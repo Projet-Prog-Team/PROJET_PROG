@@ -1,8 +1,8 @@
 #!/bin/sh
 echo "Test de la lecture des sections :"
-for file in ../Examples_loader/*.o
+for file in `grep -rIL . ./Examples_loader`
 do
-    ../affichage_table_sections $file > mySections.txt
+    ./ARM_runner_example -s $file > mySections.txt
     arm-none-eabi-readelf -S $file | head -n -5 | tail -n +5 > trueSections.txt
     if [ "$(diff -EZbwB mySections.txt trueSections.txt)" ]
     then
