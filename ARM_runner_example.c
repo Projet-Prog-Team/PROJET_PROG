@@ -25,7 +25,8 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdlib.h>
 #include "debug.h"
 #include "arm_simulator_interface.h"
-#include "readHeader.c"
+#include "Functions/readSectionHeader.h"
+#include "Functions/readElfHeader.h"
 
 void usage(char *name) {
 	fprintf(stderr, "Usage:\n"
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]) {
 
 	hostname = NULL;
 	servicename = NULL;
-	while ((opt = getopt_long(argc, argv, "S:H:d:h:j", longopts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j", longopts, NULL)) != -1) {
 		switch(opt) {
 		case 'H':
 			hostname = optarg;
@@ -87,8 +88,11 @@ int main(int argc, char *argv[]) {
 		case 'd':
 			add_debug_to(optarg);
 			break;
+		case 's':
+			readSections(argv[2], 1);
+			exit(0);
 		case 'j':
-			readHeader(argv[2]);
+			readHeaderAffichage(argv[2]);
 			exit(0);
 		default:
 			fprintf(stderr, "Unrecognized option %c\n", opt);
