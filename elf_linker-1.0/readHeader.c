@@ -27,7 +27,7 @@ Elf32_Ehdr * readHeader(const char * file){
     //Endianess
     fread(&header->e_ident[EI_DATA],1,1,elfFile);
     if(header->e_ident[EI_DATA]==1){
-        printf("\tData:\t2's complement, litle endian\n");
+        printf("\tData:\t2's complement, little endian\n");
     }else if(header->e_ident[EI_DATA]==2){
         printf("\tData:\t2's complement, big endian\n");
     }else {
@@ -107,7 +107,7 @@ Elf32_Ehdr * readHeader(const char * file){
             printf("\tType:\tREL (Relocatable file)");
             break;
         case 2:
-            printf("\tType:\tEXEC");
+            printf("\tType:\tEXEC (Executable file)");
             break;
         case 3:
             printf("\tType:\tDYN");
@@ -164,7 +164,7 @@ Elf32_Ehdr * readHeader(const char * file){
         fread(&header->e_entry,8,1,elfFile);
         header->e_entry = bswap_64(header->e_entry);
     }
-    printf("\tEntry point address:\t0x%d\n",header->e_entry);
+    printf("\tEntry point address:\t0x%x\n",header->e_entry);
 
     //Program headers offset
     if (header->e_ident[EI_CLASS] == 1){

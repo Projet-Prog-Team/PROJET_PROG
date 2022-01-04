@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "Test de la lecture du header :"
-for file in `ls ./Examples_loader/*.o`
+for file in `grep -rIL . ./Examples_loader`
 do
     ./ARM_runner_example -j $file > myHeader.txt
     arm-none-eabi-readelf -h $file | grep -v Flags | grep -v Magic > trueHeader.txt
