@@ -11,6 +11,6 @@ Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Ehdr header);
 
 void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f);
 
-int readSections(const char * file, int affichage);
+int readSectionsHeader(const char * file, int affichage);
 
 #endif
