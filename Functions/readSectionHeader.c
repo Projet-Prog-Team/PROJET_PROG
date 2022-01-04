@@ -135,7 +135,7 @@ void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f) {
     }
 }
 
-int readSections(const char * file, int affichage) {
+int readSectionsHeader(const char * file, int affichage) {
     FILE *f = fopen(file, "r");
     if (f == NULL) {
         printf("Erreur : impossible d'ouvrir le fichier\n");
