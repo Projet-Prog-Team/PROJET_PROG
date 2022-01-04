@@ -135,19 +135,17 @@ void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f) {
     }
 }
 
-int readSectionsHeader(const char * file, int affichage) {
+Elf32_Shdr *readSectionsHeader(const char * file, int affichage) {
     FILE *f = fopen(file, "r");
     if (f == NULL) {
         printf("Erreur : impossible d'ouvrir le fichier\n");
-        return 1;
+        return NULL;
     }
     Elf32_Ehdr * header = readHeader(file);
+    Elf32_Shdr * sectionHeader = loadTabSectionHeader(f, *header);
     if (affichage) {
-        printSectionHeader(loadTabSectionHeader(f, *header), *header, f);
-    } else {
-        loadTabSectionHeader(f, *header);
+        printSectionHeader(sectionHeader, *header, f);
     }
-
     fclose(f);
-    return 0;
+    return sectionHeader;
 }

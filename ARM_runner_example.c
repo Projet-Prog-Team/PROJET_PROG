@@ -28,6 +28,7 @@ Contact: Guillaume.Huard@imag.fr
 #include "Functions/readSectionHeader.h"
 #include "Functions/readSectionContent.h"
 #include "Functions/readElfHeader.h"
+#include "Functions/readSymTable.h"
 
 void usage(char *name) {
 	fprintf(stderr, "Usage:\n"
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) {
 	hostname = NULL;
 	servicename = NULL;
 
-	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j:r", longopts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j:r:b", longopts, NULL)) != -1) {
 		switch(opt) {
 		case 'H':
 			hostname = optarg;
@@ -97,10 +98,9 @@ int main(int argc, char *argv[]) {
 		case 'j':
 			readHeaderAffichage(argv[2]);
 			exit(0);
-		/*case 'b':
-			readSectionContent();
-			break;
-		*/
+		case 'b':
+			readSymTable(argv[2], 1);
+			exit(0);
 		case 'r' :
 			readRawSectionContent(argv[2]);
 			break;
