@@ -5,8 +5,7 @@ void readRawSectionContent(const char * f_char)
     Elf32_Ehdr header = *readHeader(f_char);
     FILE* file = fopen(f_char,"r");
     Elf32_Shdr* sect_header = loadTabSectionHeader(file, header);
-    unsigned char * temp =malloc(sizeof(unsigned char)*2);
-    unsigned char * temp_2=malloc(sizeof(unsigned char)*2);
+    unsigned char temp[2];
     char * nom_section = malloc(sizeof(char) * 512);
     for(int i=1;i<header.e_shnum;i++)
     {
@@ -22,16 +21,8 @@ void readRawSectionContent(const char * f_char)
             for(int j=1;j<sect_header[i].sh_size;j++)
             {
                 fread(temp,sizeof(unsigned char),1,file);
-                if(j%2!=0)              //invert the byte (big endian)
-                {
-                    temp_2[0]=temp[0];
-                    temp_2[1]=temp[1];
-                }
-                else
-                {
-                    printf("%02x",temp[0]);
-                    printf("%02x",temp_2[0]);
-                }
+                printf("%02x",temp[0]);
+
                 if((j%8==0 || j%2==0)&&j!=0)    //adding some space
                     printf(" ");
                 if((j%16==0)&&j!=0)
@@ -40,8 +31,6 @@ void readRawSectionContent(const char * f_char)
             printf("\n\n");
         }
     }
-    free(temp);
-    free(temp_2);
     free(nom_section);
     fclose(file);
 }
