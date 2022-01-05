@@ -102,8 +102,6 @@ void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f) {
         printf("  %06x", Tab[i].sh_offset);
         printf("  %06x", Tab[i].sh_size);
         printf("  %02x", Tab[i].sh_entsize);
-        // TO DO : afficher le nom du flag plutôt que son numéro
-
         printf("   ");
 
         if (Tab[i].sh_flags & 1) {

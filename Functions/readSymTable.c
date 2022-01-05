@@ -2,7 +2,7 @@
 
 Elf32_Sym *loadSymTable(FILE *f, Elf32_Shdr *sectionHeader, Elf32_Ehdr header, int * nb_symboles) {
     int i = 0;
-    while ((sectionHeader[i].sh_type != 2) || (i >= header.e_shnum)) {
+    while ((sectionHeader[i].sh_type != 2) && (i < header.e_shnum)) {
         i++;
     }
     if (i >= header.e_shnum) {
