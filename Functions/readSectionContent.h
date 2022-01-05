@@ -2,6 +2,7 @@
 #define __readSectionContent_h__
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <byteswap.h>
 #include "readSectionHeader.h"
 #include "readElfHeader.h"

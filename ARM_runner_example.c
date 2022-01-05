@@ -30,6 +30,7 @@ Contact: Guillaume.Huard@imag.fr
 #include "Functions/readElfHeader.h"
 #include "Functions/readSymTable.h"
 #include "Functions/readRelocTable.h"
+#include "Functions/renumSections.h"
 
 void usage(char *name) {
 	fprintf(stderr, "Usage:\n"
@@ -106,8 +107,8 @@ int main(int argc, char *argv[]) {
 			readRelocTable(argv[2], 1);
 			exit(0);
 		case 'r' :
-			readRawSectionContent(argv[2]);
-			break;
+			writeFile(argv[2], "resultat.o");
+			exit(0);
 		default:
 			fprintf(stderr, "Unrecognized option %c\n", opt);
 			usage(argv[0]);
