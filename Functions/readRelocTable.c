@@ -25,73 +25,75 @@ Elf32_Rel ** loadRelocTable(FILE *f, Elf32_Shdr * sectionHeader, Elf32_Ehdr head
         }
         i++;
     }
-    return Tab;
+    return k == 0 ? NULL : Tab;
 }
 
 void printRelocTable(FILE *f, Elf32_Rel **  tabRel, Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr header, TableauSectionReloc * tabSecRel){
-    Elf32_Word symIndex;
-    for(int i=0; i < tabSecRel->nbSections; i++){    // i : indice de la section courante
-        for(int j=0; j < tabSecRel->TabNb[i]; j++){  // j : numéro de la ligne de la section courante
-            printf("%08x\t", tabRel[i][j].r_offset);
+    if (tabRel != NULL) {
+        Elf32_Word symIndex;
+        for(int i=0; i < tabSecRel->nbSections; i++){    // i : indice de la section courante
+            for(int j=0; j < tabSecRel->TabNb[i]; j++){  // j : numéro de la ligne de la section courante
+                printf("%08x\t", tabRel[i][j].r_offset);
 
-            // Info
-            printf("%08x\t", tabRel[i][j].r_info);
+                // Info
+                printf("%08x\t", tabRel[i][j].r_info);
 
-            // Type
-            switch(ELF32_R_TYPE(tabRel[i][j].r_info)) {
-                case 2:
-                    printf("R_ARM_ABS32\t");
-                    break;
-                case 5:
-                    printf("R_ARM_ABS16\t");
-                    break;
-                case 8:
-                    printf("R_ARM_ABS8\t");
-                    break;
-                case 28:
-                    printf("R_ARM_CALL\t");
-                    break;
-                case 29:
-                    printf("R_ARM_JUMP24\t");
-                    break;
-            }
-            // Sym Value
-            symIndex = ELF32_R_SYM(tabRel[i][j].r_info);
-            printf("%08x\t", Tab[symIndex].st_value);
-            
-            // Sym Name
-
-            int scan, compteur;
-            char nom_section[512];
-            char c;
-            if (Tab[symIndex].st_value == 0) {
-                fseek(f, sectionHeader[header.e_shstrndx].sh_offset + sectionHeader[Tab[symIndex].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom du symbole
-                compteur = 0;
-                scan = fscanf(f, "%c", &c);  
-                while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
-                    nom_section[compteur] = c;
-                    scan = fscanf(f, "%c", &c);
-                    compteur++;
+                // Type
+                switch(ELF32_R_TYPE(tabRel[i][j].r_info)) {
+                    case 2:
+                        printf("R_ARM_ABS32\t");
+                        break;
+                    case 5:
+                        printf("R_ARM_ABS16\t");
+                        break;
+                    case 8:
+                        printf("R_ARM_ABS8\t");
+                        break;
+                    case 28:
+                        printf("R_ARM_CALL\t");
+                        break;
+                    case 29:
+                        printf("R_ARM_JUMP24\t");
+                        break;
                 }
-                nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-                printf("%s\t", nom_section);
-            } else {
-                fseek(f, sectionHeader[header.e_shstrndx -1].sh_offset + sectionHeader[Tab[symIndex].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom du symbole
-                compteur = 0;
-                scan = fscanf(f, "%c", &c);  
-                while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
-                    nom_section[compteur] = c;
-                    scan = fscanf(f, "%c", &c);
-                    compteur++;
+                // Sym Value
+                symIndex = ELF32_R_SYM(tabRel[i][j].r_info);
+                printf("%08x\t", Tab[symIndex].st_value);
+                
+                // Sym Name
+
+                int scan, compteur;
+                char nom_section[512];
+                char c;
+                if (Tab[symIndex].st_value == 0) {
+                    fseek(f, sectionHeader[header.e_shstrndx].sh_offset + sectionHeader[Tab[symIndex].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom du symbole
+                    compteur = 0;
+                    scan = fscanf(f, "%c", &c);  
+                    while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
+                        nom_section[compteur] = c;
+                        scan = fscanf(f, "%c", &c);
+                        compteur++;
+                    }
+                    nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
+                    printf("%s\t", nom_section);
+                } else {
+                    fseek(f, sectionHeader[header.e_shstrndx -1].sh_offset + Tab[symIndex].st_name, SEEK_SET); // On se rend à la position du nom du symbole
+                    compteur = 0;
+                    scan = fscanf(f, "%c", &c);  
+                    while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
+                        nom_section[compteur] = c;
+                        scan = fscanf(f, "%c", &c);
+                        compteur++;
+                    }
+                    nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
+                    printf("%s\t", nom_section);
                 }
-                nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-                printf("%s\t", nom_section);
+                printf("\n");      
             }
-
-
-            printf("\n");      
+            printf("\n");                    
         }
-        printf("\n");                    
+    } else {
+        printf("There are no relocations in this file.\n");
     }
 }
 
