@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 	hostname = NULL;
 	servicename = NULL;
 
-	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j:r:b:a", longopts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j:r:b:a:k", longopts, NULL)) != -1) {
 		switch(opt) {
 		case 'H':
 			hostname = optarg;
@@ -106,8 +106,12 @@ int main(int argc, char *argv[]) {
 		case 'a':
 			readRelocTable(argv[2], 1);
 			exit(0);
+		case 'k':
+			readRawSectionContent(argv[2]);
+			exit(0);
 		case 'r' :
-			writeFile(argv[2], "resultat.o");
+			//writeSectionContentFile(argv[2], "resultat.o");
+			renumSect(argv[2], "resultat.o");
 			exit(0);
 		default:
 			fprintf(stderr, "Unrecognized option %c\n", opt);
