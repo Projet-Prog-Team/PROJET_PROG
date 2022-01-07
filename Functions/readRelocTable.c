@@ -1,21 +1,20 @@
 #include "readRelocTable.h"
 
 
-Elf32_Rel ** loadRelocTable(FILE *f, Elf32_Shdr * sectionHeader, Elf32_Ehdr header, TableauSectionReloc * tabSecRel){
-    tabSecRel->nbSections = 0;
+Elf32_Rel ** loadRelocTable(FILE * f, Elf32_Main * ELF){
     int i = 0;
     int k = 0;
     Elf32_Rel **Tab = malloc(sizeof(Elf32_Rel *));
     // Parcours de toutes les sections
-    while ((i < header.e_shnum)) {
+    while ((i < ELF->header.e_shnum)) {
         // Si c'est une section de réimplantation
-        if ((sectionHeader[i].sh_type == 9)) {
+        if ((ELF->sectHeader[i].sh_type == 9)) {
             Tab = realloc(Tab, sizeof(Elf32_Rel *) * (k + 1));
-            Tab[k] = malloc(sectionHeader[i].sh_size);
-            fseek(f, sectionHeader[i].sh_offset, SEEK_SET);
-            tabSecRel->TabNb[k] = sectionHeader[i].sh_size / 8;
-            tabSecRel->nbSections++;
-            for (int j = 0; j < sectionHeader[i].sh_size / 8; j++) {
+            Tab[k] = malloc(ELF->sectHeader[i].sh_size);
+            fseek(f, ELF->sectHeader[i].sh_offset, SEEK_SET);
+            ELF->tabSecRel.TabNb[k] = ELF->sectHeader[i].sh_size / 8;
+            ELF->tabSecRel.nbSections++;
+            for (int j = 0; j < ELF->sectHeader[i].sh_size / 8; j++) {
                 fread(&Tab[k][j].r_offset, 4, 1, f);
                 Tab[k][j].r_offset = bswap_32(Tab[k][j].r_offset);
                 fread(&Tab[k][j].r_info, 4, 1, f);
@@ -25,21 +24,29 @@ Elf32_Rel ** loadRelocTable(FILE *f, Elf32_Shdr * sectionHeader, Elf32_Ehdr head
         }
         i++;
     }
-    return k == 0 ? NULL : Tab;
+    if (k == 0) {
+        for(int i = 0; i < ELF->tabSecRel.nbSections; i++) {
+            free(Tab[i]);
+        }
+        free(Tab);
+        return NULL;
+    } else {
+        return Tab;
+    }
 }
 
-void printRelocTable(FILE *f, Elf32_Rel **  tabRel, Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr header, TableauSectionReloc * tabSecRel){
-    if (tabRel != NULL) {
+void printRelocTable(FILE * f, Elf32_Main * ELF){
+    if (ELF->relTable != NULL) {
         Elf32_Word symIndex;
-        for(int i=0; i < tabSecRel->nbSections; i++){    // i : indice de la section courante
-            for(int j=0; j < tabSecRel->TabNb[i]; j++){  // j : numéro de la ligne de la section courante
-                printf("%08x\t", tabRel[i][j].r_offset);
+        for(int i=0; i < ELF->tabSecRel.nbSections; i++){    // i : indice de la section courante
+            for(int j=0; j < ELF->tabSecRel.TabNb[i]; j++){  // j : numéro de la ligne de la section courante
+                printf("%08x\t", ELF->relTable[i][j].r_offset);
 
                 // Info
-                printf("%08x\t", tabRel[i][j].r_info);
+                printf("%08x\t", ELF->relTable[i][j].r_info);
 
                 // Type
-                switch(ELF32_R_TYPE(tabRel[i][j].r_info)) {
+                switch(ELF32_R_TYPE(ELF->relTable[i][j].r_info)) {
                     case 2:
                         printf("R_ARM_ABS32\t");
                         break;
@@ -57,16 +64,16 @@ void printRelocTable(FILE *f, Elf32_Rel **  tabRel, Elf32_Sym * Tab, Elf32_Shdr 
                         break;
                 }
                 // Sym Value
-                symIndex = ELF32_R_SYM(tabRel[i][j].r_info);
-                printf("%08x\t", Tab[symIndex].st_value);
+                symIndex = ELF32_R_SYM(ELF->relTable[i][j].r_info);
+                printf("%08x\t", ELF->symTable[symIndex].st_value);
                 
                 // Sym Name
 
                 int scan, compteur;
                 char nom_section[512];
                 char c;
-                if (Tab[symIndex].st_value == 0) {
-                    fseek(f, sectionHeader[header.e_shstrndx].sh_offset + sectionHeader[Tab[symIndex].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom du symbole
+                if (ELF->symTable[symIndex].st_value == 0) {
+                    fseek(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[ELF->symTable[symIndex].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom du symbole
                     compteur = 0;
                     scan = fscanf(f, "%c", &c);  
                     while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
@@ -77,7 +84,7 @@ void printRelocTable(FILE *f, Elf32_Rel **  tabRel, Elf32_Sym * Tab, Elf32_Shdr 
                     nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
                     printf("%s\t", nom_section);
                 } else {
-                    fseek(f, sectionHeader[header.e_shstrndx -1].sh_offset + Tab[symIndex].st_name, SEEK_SET); // On se rend à la position du nom du symbole
+                    fseek(f, ELF->sectHeader[ELF->header.e_shstrndx -1].sh_offset + ELF->symTable[symIndex].st_name, SEEK_SET); // On se rend à la position du nom du symbole
                     compteur = 0;
                     scan = fscanf(f, "%c", &c);  
                     while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
@@ -95,19 +102,4 @@ void printRelocTable(FILE *f, Elf32_Rel **  tabRel, Elf32_Sym * Tab, Elf32_Shdr 
     } else {
         printf("There are no relocations in this file.\n");
     }
-}
-
-Elf32_Rel **readRelocTable(const char * file, int affichage){
-    FILE *f = fopen(file, "r");
-    if (f == NULL) {
-        printf("Erreur : impossible d'ouvrir le fichier\n");
-        return NULL;
-    }
-    TableauSectionReloc * tabSecRel = malloc(sizeof(TableauSectionReloc));
-    Elf32_Ehdr * header = readHeader(file);
-    Elf32_Shdr * sectionHeader = readSectionsHeader(file, 0);
-    Elf32_Sym * symTab = readSymTable(file, 0);
-    Elf32_Rel ** relTab = loadRelocTable(f, sectionHeader, *header, tabSecRel);
-    printRelocTable(f, relTab, symTab, sectionHeader, *header, tabSecRel);
-    return relTab;
 }

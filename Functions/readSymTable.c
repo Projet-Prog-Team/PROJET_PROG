@@ -1,17 +1,17 @@
 #include "readSymTable.h"
 
-Elf32_Sym *loadSymTable(FILE *f, Elf32_Shdr *sectionHeader, Elf32_Ehdr header, int * nb_symboles) {
+Elf32_Sym *loadSymTable(FILE *f, Elf32_Main * ELF) {
     int i = 0;
-    while ((sectionHeader[i].sh_type != 2) && (i < header.e_shnum)) {
+    while ((i < ELF->header.e_shnum) && (ELF->sectHeader[i].sh_type != 2)) {
         i++;
     }
-    if (i >= header.e_shnum) {
-        *nb_symboles = -1;
+    if (i >= ELF->header.e_shnum) {
+        ELF->nb_symboles = -1;
         return NULL;
     } else {
-        Elf32_Sym *Tab = malloc(sectionHeader[i].sh_size);
-        fseek(f, sectionHeader[i].sh_offset, SEEK_SET);
-        for (int j = 0; j < sectionHeader[i].sh_size / 16; j++) {
+        Elf32_Sym *Tab = malloc(ELF->sectHeader[i].sh_size * 16);
+        fseek(f, ELF->sectHeader[i].sh_offset, SEEK_SET);
+        for (int j = 0; j < ELF->sectHeader[i].sh_size / 16; j++) {
             fread(&Tab[j].st_name, 4, 1, f);
             Tab[j].st_name = bswap_32(Tab[j].st_name);
             fread(&Tab[j].st_value, 4, 1, f);
@@ -23,18 +23,18 @@ Elf32_Sym *loadSymTable(FILE *f, Elf32_Shdr *sectionHeader, Elf32_Ehdr header, i
             fread(&Tab[j].st_shndx, 2, 1, f);
             Tab[j].st_shndx = bswap_16(Tab[j].st_shndx);
         }
-        *nb_symboles = sectionHeader[i].sh_size / 16;
+        ELF->nb_symboles = ELF->sectHeader[i].sh_size / 16;
         return Tab;
     }
 }
 
-void printSymTable(Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr header, FILE *f, int nb_symboles) {
-    if (Tab != NULL) {
-        for (int j = 0; j < nb_symboles; j++) {
+void printSymTable(FILE * f, Elf32_Main * ELF) {
+    if (ELF->symTable != NULL) {
+        for (int j = 0; j < ELF->nb_symboles; j++) {
             printf("%d:\t", j);
-            printf("%08x\t", Tab[j].st_value);
-            printf("%d\t", Tab[j].st_size);
-            switch (Tab[j].st_info & ELF32_ST_TYPE(Tab[j].st_info)) {
+            printf("%08x\t", ELF->symTable[j].st_value);
+            printf("%d\t", ELF->symTable[j].st_size);
+            switch (ELF->symTable[j].st_info & ELF32_ST_TYPE(ELF->symTable[j].st_info)) {
                 case 0:
                     printf("NOTYPE\t");
                     break;
@@ -57,7 +57,7 @@ void printSymTable(Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr heade
                     printf("HIPROC\t");
                     break;
             }
-            switch(1 & ELF32_ST_BIND(Tab[j].st_info)){
+            switch(1 & ELF32_ST_BIND(ELF->symTable[j].st_info)){
                 case 0:
                     printf("LOCAL\t");
                     break;
@@ -76,7 +76,7 @@ void printSymTable(Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr heade
             }
             printf("DEFAULT\t");
 
-            switch(Tab[j].st_shndx){
+            switch(ELF->symTable[j].st_shndx){
                 case 0:
                     printf("UND\t");
                     break;
@@ -96,17 +96,17 @@ void printSymTable(Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr heade
                     printf("HIRESERVE\t");
                     break; 
                 default:
-                    printf("%d\t", Tab[j].st_shndx);
+                    printf("%d\t", ELF->symTable[j].st_shndx);
                     break;    
             }
 
             int scan, compteur;
             char nom_section[512];
             char c;
-            fseek(f, sectionHeader[header.e_shstrndx - 1].sh_offset + Tab[j].st_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
+            fseek(f, ELF->sectHeader[ELF->header.e_shstrndx - 1].sh_offset + ELF->symTable[j].st_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
             compteur = 0;
             scan = fscanf(f, "%c", &c);  
-            while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de la section dans la string table
+            while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de la section dans la string ELF->symTablele
                 nom_section[compteur] = c;
                 scan = fscanf(f, "%c", &c);
                 compteur++;
@@ -115,25 +115,5 @@ void printSymTable(Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr heade
             printf("%s\t", nom_section);              // Affichages...
             printf("\n");
         }
-    } else {
-        printf("Il n'existe pas de Table de Symboles.");
     }
-    
-}
-
-Elf32_Sym * readSymTable(const char * file, int affichage) {
-    FILE *f = fopen(file, "r");
-    if (f == NULL) {
-        printf("Erreur : impossible d'ouvrir le fichier\n");
-        return NULL;
-    }
-    Elf32_Ehdr * header = readHeader(file);
-    Elf32_Shdr * sectionHeader = readSectionsHeader(file, 0);
-    int x = 0;
-    Elf32_Sym * symTable = loadSymTable(f, sectionHeader, *header, &x);
-    if (affichage) {
-        printSymTable(symTable, sectionHeader, *header, f, x);
-    }
-    fclose(f);
-    return symTable;
 }

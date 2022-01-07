@@ -4,9 +4,6 @@ void writeHeader(const char * f_source, const char * f_dest, Elf32_Ehdr * header
     FILE* fsource = fopen(f_source,"r");
     FILE* fdest = fopen(f_dest,"w");
     
-    //char * headerTab[header.e_ehsize];
-    // fread(headerTab,header.e_ehsize,1,fsource)
-    //fwrite(header,header->e_ehsize,1,fdest);
     uint16_t temp16;
     uint32_t temp32;
 
@@ -107,26 +104,60 @@ void writeHeader(const char * f_source, const char * f_dest, Elf32_Ehdr * header
 
 }
 
-void writeSectionContentFile(const char * f_source, const char * f_dest, Elf32_Ehdr header, Elf32_Shdr* sect_header) { 
-    FILE* fsource = fopen(f_source,"r");
-    FILE* fdest = fopen(f_dest,"a");
-    Elf32_Word * buffer = malloc(sect_header[0].sh_size);             // Taille quelconque
-    //char c = 0;
-    for(int i = 0; i < header.e_shnum; i++) {                        // Parcours de chaque section
-        fseek(fsource, sect_header[i].sh_offset, SEEK_SET);
-        buffer = realloc(buffer, sect_header[i].sh_size);            // On alloue un bloc de la taille de la section a ecrire
-        fread(buffer, sect_header[i].sh_size, 1, fsource);           // On lit le bloc dans le fichier source
-        fwrite(buffer, sect_header[i].sh_size, 1, fdest);            // On écrit le bloc dans le fichier destination
-        /*if (i < header.e_shnum - 1) {
-            while(ftell(fdest) < sect_header[i+1].sh_offset) {     
-                fputc(c, fdest);
-            }
-        }*/
-    }
-    free(buffer);
-    fclose(fdest);
-    fclose(fsource);
-}
+// void writeSectionContentFile(const char * f_source, const char * f_dest, Elf32_Ehdr header, Elf32_Shdr* sect_header, Elf32_Sym * symTab, int nb_symboles, int offset) { 
+//     FILE* fsource = fopen(f_source,"r");
+//     FILE* fdest = fopen(f_dest,"a");
+//     char * buffer = malloc(sect_header[0].sh_size);             // Taille quelconque
+//     uint16_t temp16;
+//     uint32_t temp32;
+//     fseek(fsource, header.e_ehsize, SEEK_SET);
+//     for(int i = 0; i < header.e_shnum; i++) {                   // Parcours de chaque section
+//         if (sect_header[i].sh_size != 0){
+//             if (i < header.e_shnum - 1){
+//                 int val = i+1;
+//                 for (int j=0; j<header.e_shnum; j++){
+//                     if (sect_header[j].sh_offset>sect_header[i].sh_offset && sect_header[j].sh_offset < sect_header[val].sh_offset){
+//                         val = j;
+//                     }
+//                 }
+//                 if (sect_header[i].sh_type == SHT_SYMTAB){
+//                     printf("Test\n");
+//                     for (int k = 0; k < nb_symboles; k++) {
+//                         temp32 = bswap_32(symTab[k].st_name);
+//                         fwrite(&temp32, 4, 1, fdest);
+//                         temp32 = bswap_32(symTab[k].st_value);
+//                         fwrite(&temp32, 4, 1, fdest);
+//                         temp32 = bswap_32(symTab[k].st_size);
+//                         fwrite(&temp32, 4, 1, fdest);
+//                         fwrite(&(symTab[k].st_info), 1, 1, fdest);
+//                         fwrite(&(symTab[k].st_other), 1, 1, fdest);
+//                         temp16 = bswap_16(symTab[k].st_shndx);
+//                         fwrite(&temp16, 2, 1, fdest);
+//                     }
+//                     int size = sect_header[val].sh_offset - (nb_symboles * 16 + sect_header[i].sh_offset);
+//                     printf("size : %d\n",size);
+//                     buffer = realloc(buffer, size);
+//                     fread(buffer, size, 1, fsource);           // On lit le bloc dans le fichier source
+//                     fwrite(buffer, size, 1, fdest);  
+//                     fseek(fsource, sect_header[val].sh_offset, SEEK_SET);
+//                 }else {
+//                     int size = sect_header[i].sh_type == SHT_REL ? sect_header[i].sh_size : sect_header[val].sh_offset - sect_header[i].sh_offset;
+//                     buffer = realloc(buffer, size);
+//                     fread(buffer, size, 1, fsource);           // On lit le bloc dans le fichier source
+//                     fwrite(buffer, size, 1, fdest);           // On écrit le bloc dans le fichier destination
+//                 }
+//             }else {
+//                 buffer = realloc(buffer, offset - sect_header[i].sh_offset);
+//                 fread(buffer, offset - sect_header[i].sh_offset, 1, fsource);           // On lit le bloc dans le fichier source
+//                 fwrite(buffer, offset - sect_header[i].sh_offset, 1, fdest);           // On écrit le bloc dans le fichier destination
+//             }
+
+//         }
+//     }
+//     free(buffer);
+//     fclose(fdest);
+//     fclose(fsource);
+// }
 
 void writeSectionHeader(const char * f_source, const char * f_dest, Elf32_Ehdr header, Elf32_Shdr* sect_header) {
     FILE* fsource = fopen(f_source,"r");
@@ -143,81 +174,61 @@ void writeSectionHeader(const char * f_source, const char * f_dest, Elf32_Ehdr h
     fclose(fsource);
 }
 
-void deleteRel(Elf32_Ehdr * header, Elf32_Shdr* sect_header){
+Elf32_Shdr * deleteRel(Elf32_Ehdr * header, Elf32_Shdr* sect_header, Elf32_Sym * symTab, int nb_symboles, int * offset){
     int i=0;
+    *offset = header->e_shoff;
+    Elf32_Shdr * new_sect_header = malloc(header->e_shnum*40);
+    memmove(new_sect_header, sect_header, header->e_shnum*40);
+    FILE* fsource = fopen("Examples_loader/example2.o","r");
+    printSectionHeader(sect_header, *header, fsource);
     while(i < header->e_shnum){
-        if (sect_header[i].sh_type==SHT_REL){
+        if (new_sect_header[i].sh_type==SHT_REL){
             header->e_shstrndx--;
-            header->e_shoff -= header->e_shentsize + sect_header[i].sh_size;
-            int sizeRel = sect_header[i].sh_size;
-            int offsetRel = sect_header[i].sh_offset;
+            header->e_shoff -= new_sect_header[i].sh_size;
+            int sizeRel = new_sect_header[i].sh_size;
+            int offsetRel = new_sect_header[i].sh_offset;
             for(int j=i+1; j<header->e_shnum; j++){
-                sect_header[j-1] = sect_header[j];
+                new_sect_header[j-1] = new_sect_header[j];
             }
             for(int k=0; k < header->e_shnum; k++){
-                if (sect_header[k].sh_offset > offsetRel){
-                    sect_header[k].sh_offset -= sizeRel;
+                if (new_sect_header[k].sh_offset > offsetRel){
+                    new_sect_header[k].sh_offset -= sizeRel;
+                    printf("%d Offset : %d\n",i,new_sect_header[k].sh_offset);
+                }
+                // LINK modif
+                if (new_sect_header[k].sh_link > i){
+                    new_sect_header[k].sh_link--;
                 }
             }
+            //NDX modif 
+            // for (int l=0; l< nb_symboles ;l++){
+            //     if (symTab[l].st_shndx >= i){
+            //         symTab[l].st_shndx--;
+            //     }
+            // }
             header->e_shnum--;
         }else{
-            // printf("\nStruct %d : \n", i);
-            // printf("name : %d\n", sect_header[i].sh_name);
-            // printf("type : %d\n", sect_header[i].sh_type);
-            // printf("flags : %d\n", sect_header[i].sh_flags);
-            // printf("addr : %d\n", sect_header[i].sh_addr);
-            // printf("offset : %d\n", sect_header[i].sh_offset);
-            // printf("size : %d\n", sect_header[i].sh_size);
-            // printf("link : %d\n", sect_header[i].sh_link);
-            // printf("info : %d\n", sect_header[i].sh_info);
-            // printf("addralign : %d\n", sect_header[i].sh_addralign);
-            // printf("entsize : %d\n", sect_header[i].sh_entsize);
-            // printf("\n\n");
             i++;
         }
     }
+    printf("\n\n\n\n");
+    printSectionHeader(new_sect_header, *header, fsource);
+    return new_sect_header;
 }
 
 void renumSect(const char * f_source, const char * f_dest) {
-    Elf32_Ehdr header = *readHeader(f_source);
+    Elf32_Ehdr* header = readHeader(f_source);
     Elf32_Shdr* sect_header = readSectionsHeader(f_source, 0);
-    
-    deleteRel(&header, sect_header);
-    writeHeader(f_source, f_dest, &header);
-    writeSectionContentFile(f_source, f_dest, header, sect_header);
-    writeSectionHeader(f_source, f_dest, header, sect_header);
+    int nb_symboles = 0;
+    FILE *fsource = fopen(f_source, "r");
+    if (fsource == NULL) {
+        printf("Erreur : impossible d'ouvrir le fichier\n");
+        return;
+    }
+    Elf32_Sym* symTab = loadSymTable(fsource, sect_header, *header, &nb_symboles);
+    int val;
+    writeHeader(f_source, f_dest, header);
+    writeSectionContentFile(f_source, f_dest, *header, sect_header, symTab, nb_symboles, val);
+    writeSectionHeader(f_source, f_dest, *header, new_sect_header);
+    fclose(fsource);
 }
-
-
-/*void (const char * file, Elf32_Shdr * sectionHeader, Elf32_Ehdr header) {
-    FILE *f = fopen(file, "r");
-    FILE *fdest = fopen("sortie.o", "w");
-    if ((f == NULL) || (fdest == NULL)) {
-        printf("Erreur : impossible d'ouvrir le(s) fichier(s)\n");
-        return NULL;
-    }
-    
-
-
-
-    long int size;
-    int i = 0;
-    while (i < header.e_shnum) {
-        // Si c'est une section de réimplantation
-        if (sectionHeader[i].sh_type == 9) {    
-            fseek(f, 0L, SEEK_END);   // Calcul de la taille du fichier
-
-
-            size = ftell(f) - (sectionHeader[i].sh_offset + sectionHeader[i].sh_size);
-
-
-            fseek(f, sectionHeader[i].sh_offset + sectionHeader[i].sh_size, SEEK_SET);
-            char *buffer = malloc(size);
-            fread(&buffer, size, 1, f);
-            fseek(fdest, sectionHeader[i].sh_offset, SEEK_SET);
-            fwrite(&buffer,size, 1, fdest);
-            header.e_shnum--;
-        }
-        i++;
-    }
-}*/

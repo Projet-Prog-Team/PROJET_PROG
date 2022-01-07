@@ -2,7 +2,7 @@
 echo "Test de la lecture du header :"
 for file in `grep -rIL . ./Examples_loader`
 do
-    ./ARM_runner_example -j $file > myHeader.txt
+    ./ARM_runner -h $file > myHeader.txt
     arm-none-eabi-readelf -h $file | grep -v Flags | grep -v Magic > trueHeader.txt
     if [ "$(diff -EZbwB myHeader.txt trueHeader.txt)" ]
     then

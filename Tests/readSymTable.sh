@@ -2,7 +2,7 @@
 echo "Test de la lecture de la table des symboles :"
 for file in `grep -rIL . ./Examples_loader`
 do
-    ./ARM_runner_example -b $file > mySymTable.txt
+    ./ARM_runner -s $file > mySymTable.txt
     arm-none-eabi-readelf -s $file | tail -n +4 > trueSymTable.txt
     if [ "$(diff -EZbwB mySymTable.txt trueSymTable.txt)" ]
     then

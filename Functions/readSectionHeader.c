@@ -1,13 +1,15 @@
 #include "readSectionHeader.h"
+#include <errno.h>
+#include <string.h> 
 
-Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Ehdr header) {
-    Elf32_Shdr *Tab = malloc(header.e_shentsize * header.e_shnum);   // Allocation d'un tableau de structure (16 * 40 octets)
+Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Main * ELF) {
+    Elf32_Shdr *Tab = malloc(ELF->header.e_shentsize * ELF->header.e_shnum);   // Allocation d'un tableau de structure (16 * 40 octets)
     if (Tab == NULL){
         printf("Erreur d'allocation mémoire du tableau\n");
         return NULL;
     }
-    fseek(f, header.e_shoff, SEEK_SET);                              // Déplacement au début des section headers
-    for(int i = 0; i < header.e_shnum; i++){                         // Pour chaque section
+    fseek(f, ELF->header.e_shoff, SEEK_SET);                              // Déplacement au début des section headers
+    for(int i = 0; i < ELF->header.e_shnum; i++){                         // Pour chaque section
         Elf32_Word *Adresse = (Elf32_Word *) &Tab[i];                // Adresse de parcours des mots de chaque structure
         for(int j = 0; j < 10; j++){                                 // Pour chaque mot (32 bits)
             if (fread(Adresse, 4, 1, f) != 1) {                      // Lecture du mot (1 bloc de 4 octets)
@@ -22,14 +24,14 @@ Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Ehdr header) {
     return Tab;
 }
 
-void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f) {
+void printSectionHeader(FILE *f, Elf32_Main * ELF) {
     int scan, compteur;
     char nom_section[512];
     char c;
-    for(int i = 0; i < header.e_shnum; i++) {                        // Pour chaque section
+    for(int i = 0; i < ELF->header.e_shnum; i++) {                        // Pour chaque section
         printf("[%d]", i);
         
-        fseek(f, Tab[header.e_shstrndx].sh_offset + Tab[i].sh_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
+        fseek(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[i].sh_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
 
         compteur = 0;
         scan = fscanf(f, "%c", &c);  
@@ -42,7 +44,7 @@ void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f) {
         printf("   %s", nom_section);                       // Affichages...
 
         // Switch pour afficher le nom du type plutôt que son numéro
-        switch (Tab[i].sh_type) {
+        switch (ELF->sectHeader[i].sh_type) {
             case 0:
                 printf("  NULL");
                 break;
@@ -98,52 +100,37 @@ void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f) {
                 printf("   UNKNOWN");
                 break;
         }
-        printf("  %08x", Tab[i].sh_addr);
-        printf("  %06x", Tab[i].sh_offset);
-        printf("  %06x", Tab[i].sh_size);
-        printf("  %02x", Tab[i].sh_entsize);
+        printf("  %08x", ELF->sectHeader[i].sh_addr);
+        printf("  %06x", ELF->sectHeader[i].sh_offset);
+        printf("  %06x", ELF->sectHeader[i].sh_size);
+        printf("  %02x", ELF->sectHeader[i].sh_entsize);
         printf("   ");
 
-        if (Tab[i].sh_flags & 1) {
+        if (ELF->sectHeader[i].sh_flags & 1) {
             printf("W");
         }
-        if (Tab[i].sh_flags & 2) {
+        if (ELF->sectHeader[i].sh_flags & 2) {
             printf("A");
         }
-        if (Tab[i].sh_flags & 4) {
+        if (ELF->sectHeader[i].sh_flags & 4) {
             printf("X");
         }
-        if (Tab[i].sh_flags & 16) {
+        if (ELF->sectHeader[i].sh_flags & 16) {
             printf("M");
         }
-        if (Tab[i].sh_flags & 32) {
+        if (ELF->sectHeader[i].sh_flags & 32) {
             printf("S");
         }
-        if (Tab[i].sh_flags & 64) {
+        if (ELF->sectHeader[i].sh_flags & 64) {
             printf("I");
         }
-        if (Tab[i].sh_flags & 128) {
+        if (ELF->sectHeader[i].sh_flags & 128) {
             printf("L");
         }
 
         
-        printf("  %d", Tab[i].sh_link);
-        printf("  %d", Tab[i].sh_info);
-        printf("  %x\n", Tab[i].sh_addralign);
+        printf("  %d", ELF->sectHeader[i].sh_link);
+        printf("  %d", ELF->sectHeader[i].sh_info);
+        printf("  %x\n", ELF->sectHeader[i].sh_addralign);
     }
-}
-
-Elf32_Shdr *readSectionsHeader(const char * file, int affichage) {
-    FILE *f = fopen(file, "r");
-    if (f == NULL) {
-        printf("Erreur : impossible d'ouvrir le fichier\n");
-        return NULL;
-    }
-    Elf32_Ehdr * header = readHeader(file);
-    Elf32_Shdr * sectionHeader = loadTabSectionHeader(f, *header);
-    if (affichage) {
-        printSectionHeader(sectionHeader, *header, f);
-    }
-    fclose(f);
-    return sectionHeader;
 }
