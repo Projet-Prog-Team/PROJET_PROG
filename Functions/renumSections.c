@@ -180,10 +180,13 @@ Elf32_Shdr * deleteRel(Elf32_Ehdr * header, Elf32_Shdr* sect_header, Elf32_Sym *
     Elf32_Shdr * new_sect_header = malloc(header->e_shnum*40);
     memmove(new_sect_header, sect_header, header->e_shnum*40);
     FILE* fsource = fopen("Examples_loader/example2.o","r");
+    uint32_t sh_offset = header->e_shoff
     printSectionHeader(sect_header, *header, fsource);
     while(i < header->e_shnum){
         if (new_sect_header[i].sh_type==SHT_REL){
-            header->e_shstrndx--;
+            if (header->e_shstrndx > i ) {
+                header->e_shstrndx--;
+            }
             header->e_shoff -= new_sect_header[i].sh_size;
             int sizeRel = new_sect_header[i].sh_size;
             int offsetRel = new_sect_header[i].sh_offset;
@@ -195,8 +198,10 @@ Elf32_Shdr * deleteRel(Elf32_Ehdr * header, Elf32_Shdr* sect_header, Elf32_Sym *
                     new_sect_header[k].sh_offset -= sizeRel;
                     printf("%d Offset : %d\n",i,new_sect_header[k].sh_offset);
                 }
+                int linkCondition = new_sect_header[k].sh_type == SHT_HASH;
+                linkCondition ||= new_sect_header[k].sh_type == SHT_DYNAMIC;
                 // LINK modif
-                if (new_sect_header[k].sh_link > i){
+                if (linkCondition && new_sect_header[k].sh_link > i){
                     new_sect_header[k].sh_link--;
                 }
             }
@@ -220,7 +225,7 @@ void renumSect(const char * f_source, const char * f_dest) {
     Elf32_Ehdr* header = readHeader(f_source);
     Elf32_Shdr* sect_header = readSectionsHeader(f_source, 0);
     int nb_symboles = 0;
-    FILE *fsource = fopen(f_source, "r");
+    FILE *fsource = fopen(f_source, "rb");
     if (fsource == NULL) {
         printf("Erreur : impossible d'ouvrir le fichier\n");
         return;

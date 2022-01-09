@@ -19,7 +19,7 @@ void printRawSectionContent(FILE *file, Elf32_Main * ELF)
             {
                 fread(temp,sizeof(unsigned char),1,file);  
                 printf("%02x",temp[0]);
-                if((j%8==0 || j%2==0)&&j!=0)    //adding some space
+                if(j%2==0&&j!=0)    //adding some space
                     printf(" ");
                 if((j%16==0)&&j!=0)
                     printf("\n");
