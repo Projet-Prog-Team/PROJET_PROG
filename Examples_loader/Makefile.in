@@ -87,9 +87,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 @HAVE_ARM_COMPILER_TRUE@noinst_PROGRAMS = example1$(EXEEXT) \
-@HAVE_ARM_COMPILER_TRUE@	example2$(EXEEXT) \
-@HAVE_ARM_COMPILER_TRUE@	example2Copy$(EXEEXT) \
-@HAVE_ARM_COMPILER_TRUE@	example3$(EXEEXT) example4$(EXEEXT)
+@HAVE_ARM_COMPILER_TRUE@	example2$(EXEEXT) example3$(EXEEXT) \
+@HAVE_ARM_COMPILER_TRUE@	example4$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../m4/ax_check_compile_flag.m4 \
@@ -113,11 +112,6 @@ am__example2_SOURCES_DIST = example2.s
 @HAVE_ARM_COMPILER_TRUE@am_example2_OBJECTS = example2.$(OBJEXT)
 example2_OBJECTS = $(am_example2_OBJECTS)
 example2_LDADD = $(LDADD)
-am__example2Copy_SOURCES_DIST = example2Copy.s
-@HAVE_ARM_COMPILER_TRUE@am_example2Copy_OBJECTS =  \
-@HAVE_ARM_COMPILER_TRUE@	example2Copy.$(OBJEXT)
-example2Copy_OBJECTS = $(am_example2Copy_OBJECTS)
-example2Copy_LDADD = $(LDADD)
 am__example3_SOURCES_DIST = example3.s
 @HAVE_ARM_COMPILER_TRUE@am_example3_OBJECTS = example3.$(OBJEXT)
 example3_OBJECTS = $(am_example3_OBJECTS)
@@ -156,12 +150,11 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(example1_SOURCES) $(example2_SOURCES) \
-	$(example2Copy_SOURCES) $(example3_SOURCES) \
+SOURCES = $(example1_SOURCES) $(example2_SOURCES) $(example3_SOURCES) \
 	$(example4_SOURCES)
 DIST_SOURCES = $(am__example1_SOURCES_DIST) \
-	$(am__example2_SOURCES_DIST) $(am__example2Copy_SOURCES_DIST) \
-	$(am__example3_SOURCES_DIST) $(am__example4_SOURCES_DIST)
+	$(am__example2_SOURCES_DIST) $(am__example3_SOURCES_DIST) \
+	$(am__example4_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -293,7 +286,6 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -321,7 +313,6 @@ ACLOCAL_AMFLAGS = -I ../m4
 @HAVE_ARM_COMPILER_TRUE@	-Wl,-EB
 @HAVE_ARM_COMPILER_TRUE@example1_SOURCES = example1.s
 @HAVE_ARM_COMPILER_TRUE@example2_SOURCES = example2.s
-@HAVE_ARM_COMPILER_TRUE@example2Copy_SOURCES = example2Copy.s
 @HAVE_ARM_COMPILER_TRUE@example3_SOURCES = example3.s
 @HAVE_ARM_COMPILER_TRUE@example4_SOURCES = example4.s
 all: config.h
@@ -388,10 +379,6 @@ example1$(EXEEXT): $(example1_OBJECTS) $(example1_DEPENDENCIES) $(EXTRA_example1
 example2$(EXEEXT): $(example2_OBJECTS) $(example2_DEPENDENCIES) $(EXTRA_example2_DEPENDENCIES) 
 	@rm -f example2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(example2_OBJECTS) $(example2_LDADD) $(LIBS)
-
-example2Copy$(EXEEXT): $(example2Copy_OBJECTS) $(example2Copy_DEPENDENCIES) $(EXTRA_example2Copy_DEPENDENCIES) 
-	@rm -f example2Copy$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(example2Copy_OBJECTS) $(example2Copy_LDADD) $(LIBS)
 
 example3$(EXEEXT): $(example3_OBJECTS) $(example3_DEPENDENCIES) $(EXTRA_example3_DEPENDENCIES) 
 	@rm -f example3$(EXEEXT)
