@@ -8,7 +8,8 @@
 #include "Functions/readElfHeader.h"
 #include "Functions/readSymTable.h"
 #include "Functions/readRelocTable.h"
-//#include "Functions/renumSections.h"
+#include "Functions/writeFile.h"
+#include "Functions/implantation.h"
 #include "structure.h"
 
 
@@ -24,29 +25,44 @@ void usage(char *name) {
 int main(int argc, char *argv[]) {
     int opt;
     	struct option longopts[] = {
-		{ "header", required_argument, NULL, 'h' },
+		{ "header", 0, NULL, 'h' },
 		{ "section", required_argument, NULL, 'S' },
 		{ "symtab", required_argument, NULL, 's' },
 		{ "reloc", required_argument, NULL, 'r' },
 		{ "all", required_argument, NULL, 'a' },
+		{ "text", required_argument, NULL, 't' },
+		{ "data", required_argument, NULL, 'j' },
 		{ NULL, 0, NULL, 0 }
 	};
-    // TO DO : vérifier que les fichiers sont bien ouverts
-    FILE * f_source = fopen(argv[2], "rb");
-    // TO DO : vérifier que argv 3 existe ou pas avant d'ouvrir f_dest
-    //FILE * f_dest = fopen(argv[3], "w");
+
+    FILE * f_source = fopen(argv[1], "rb");
+	if (f_source == NULL) {
+		printf("Impossible d'ouvrir le fichier source\n");
+		return 1;
+	}
+	FILE * f_dest;
+	if(argc>=3) {
+		f_dest = fopen(argv[2], "w");
+		if (f_dest == NULL) {
+			printf("Impossible d'ouvrir le fichier destination\n");
+			return 1;
+		}
+	} 
+
 
     Elf32_Main ELF;
     ELF.header = loadHeader(f_source);
-    rewind(f_source);
     ELF.sectHeader = loadTabSectionHeader(f_source, &ELF);
 	ELF.symTable = loadSymTable(f_source, &ELF);
     TableauSectionReloc tabSecRel;
     tabSecRel.nbSections = 0;
     ELF.tabSecRel = tabSecRel;
 	ELF.relTable = loadRelocTable(f_source, &ELF);
+	ELF.sectionContent = loadSectionContent(f_source, &ELF);
+
 	
-	while ((opt = getopt_long(argc, argv, "h:S:s:r:x:e:a", longopts, NULL)) != -1) {
+
+	while ((opt = getopt_long(argc, argv, "h:S:s:r:x:e:a:w:d", longopts, NULL)) != -1) {
 		switch(opt) {
 		case 'h':
 			printHeader(&ELF);
@@ -61,7 +77,22 @@ int main(int argc, char *argv[]) {
 			printRelocTable(f_source, &ELF);
 			exit(0);
 		case 'x':
-			printRawSectionContent(f_source, &ELF);
+			printSectionContent(&ELF);
+			exit(0);
+		case 'w':
+			if(argc>=3){
+				writeHeader(&ELF, f_dest);
+				writeSectionContent(&ELF, f_dest);
+				writeSectionHeader(&ELF, f_dest);
+			}
+			exit(0);
+		case 'd':
+			if(argc>=3){
+				deleteRel(&ELF);
+				writeHeader(&ELF, f_dest);
+				writeSectionContent(&ELF, f_dest);
+				writeSectionHeader(&ELF, f_dest);
+			}
 			exit(0);
 		case 'a':
 			printHeader(&ELF);
@@ -73,6 +104,22 @@ int main(int argc, char *argv[]) {
 			printRelocTable(f_source, &ELF);
 			printf("\n");
 			exit(0);
+		case 't':
+			correctSymTable(f_source,&ELF, strtol(optarg,NULL,16), 0);
+			if(argc>=3){
+				writeHeader(&ELF, f_dest);
+				writeSectionContent(&ELF, f_dest);
+				writeSectionHeader(&ELF, f_dest);
+			}
+			break;
+		case 'j':
+			correctSymTable(f_source, &ELF, 0, strtol(optarg,NULL,16));
+			if(argc>=3){
+				writeHeader(&ELF, f_dest);
+				writeSectionContent(&ELF, f_dest);
+				writeSectionHeader(&ELF, f_dest);
+			}
+			break;
 		default:
 			fprintf(stderr, "Unrecognized option %c\n", opt);
 			usage(argv[0]);
@@ -81,6 +128,9 @@ int main(int argc, char *argv[]) {
 	}
 
     fclose(f_source);
+	if(argc>=3){
+		fclose(f_dest);
+	}
 
 	free(ELF.sectHeader);
 	free(ELF.symTable);

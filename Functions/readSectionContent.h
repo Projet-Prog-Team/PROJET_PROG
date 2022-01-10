@@ -7,6 +7,10 @@
 #include <elf.h>
 #include "../structure.h"
 
-void printRawSectionContent(FILE *file, Elf32_Main * ELF);
+// void printRawSectionContent(FILE *file, Elf32_Main * ELF);
+
+SectionContent * loadSectionContent(FILE * file, Elf32_Main * ELF);
+
+void printSectionContent(Elf32_Main * ELF);
 
 #endif
