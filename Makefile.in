@@ -86,7 +86,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = ARM_runner_example$(EXEEXT)
+bin_PROGRAMS = ARM_runner_example$(EXEEXT) ARM_runner$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/hostsubdir.m4 \
@@ -105,6 +105,14 @@ PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = debug.$(OBJEXT) util.$(OBJEXT)
 am__objects_2 = csapp.$(OBJEXT) scanner.$(OBJEXT) \
 	gdb_protocol.$(OBJEXT) arm_simulator_interface.$(OBJEXT)
+am_ARM_runner_OBJECTS = $(am__objects_1) $(am__objects_2) \
+	ARM_runner.$(OBJEXT) readSectionHeader.$(OBJEXT) \
+	readElfHeader.$(OBJEXT) readSectionContent.$(OBJEXT) \
+	readSymTable.$(OBJEXT) readRelocTable.$(OBJEXT) \
+	writeFile.$(OBJEXT) implantation.$(OBJEXT)
+ARM_runner_OBJECTS = $(am_ARM_runner_OBJECTS)
+ARM_runner_LDADD = $(LDADD)
+ARM_runner_DEPENDENCIES =
 am_ARM_runner_example_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	ARM_runner_example.$(OBJEXT)
 ARM_runner_example_OBJECTS = $(am_ARM_runner_example_OBJECTS)
@@ -125,11 +133,21 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/ARM_runner_example.Po \
+am__depfiles_remade = ./$(DEPDIR)/ARM_runner.Po \
+	./$(DEPDIR)/ARM_runner_example.Po \
 	./$(DEPDIR)/arm_simulator_interface.Po ./$(DEPDIR)/csapp.Po \
 	./$(DEPDIR)/debug.Po ./$(DEPDIR)/gdb_protocol.Po \
-	./$(DEPDIR)/scanner.Po ./$(DEPDIR)/util.Po
+	./$(DEPDIR)/implantation.Po ./$(DEPDIR)/readElfHeader.Po \
+	./$(DEPDIR)/readRelocTable.Po \
+	./$(DEPDIR)/readSectionContent.Po \
+	./$(DEPDIR)/readSectionHeader.Po ./$(DEPDIR)/readSymTable.Po \
+	./$(DEPDIR)/scanner.Po ./$(DEPDIR)/util.Po \
+	./$(DEPDIR)/writeFile.Po
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
@@ -148,8 +166,8 @@ am__v_LEX_ = $(am__v_LEX_@AM_DEFAULT_V@)
 am__v_LEX_0 = @echo "  LEX     " $@;
 am__v_LEX_1 = 
 YLWRAP = $(top_srcdir)/build-aux/ylwrap
-SOURCES = $(ARM_runner_example_SOURCES)
-DIST_SOURCES = $(ARM_runner_example_SOURCES)
+SOURCES = $(ARM_runner_SOURCES) $(ARM_runner_example_SOURCES)
+DIST_SOURCES = $(ARM_runner_SOURCES) $(ARM_runner_example_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -348,6 +366,7 @@ COMMON = debug.h debug.c util.h util.c
 EXTRA_DIST = filtre.pl sample_run.sh
 SIMULATOR_INTERFACE = csapp.h csapp.c scanner.h scanner.l gdb_protocol.h gdb_protocol.c arm_simulator_interface.h arm_simulator_interface.c
 ARM_runner_example_SOURCES = $(COMMON) $(SIMULATOR_INTERFACE) ARM_runner_example.c
+ARM_runner_SOURCES = $(COMMON) $(SIMULATOR_INTERFACE)  ARM_runner.c Functions/readSectionHeader.c Functions/readElfHeader.c  Functions/readSectionContent.c Functions/readSymTable.c Functions/readRelocTable.c Functions/writeFile.c Functions/implantation.c structure.h
 all: all-recursive
 
 .SUFFIXES:
@@ -428,6 +447,10 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+ARM_runner$(EXEEXT): $(ARM_runner_OBJECTS) $(ARM_runner_DEPENDENCIES) $(EXTRA_ARM_runner_DEPENDENCIES) 
+	@rm -f ARM_runner$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(ARM_runner_OBJECTS) $(ARM_runner_LDADD) $(LIBS)
+
 ARM_runner_example$(EXEEXT): $(ARM_runner_example_OBJECTS) $(ARM_runner_example_DEPENDENCIES) $(EXTRA_ARM_runner_example_DEPENDENCIES) 
 	@rm -f ARM_runner_example$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(ARM_runner_example_OBJECTS) $(ARM_runner_example_LDADD) $(LIBS)
@@ -438,13 +461,21 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ARM_runner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ARM_runner_example.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm_simulator_interface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csapp.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb_protocol.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/implantation.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readElfHeader.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readRelocTable.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSectionContent.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSectionHeader.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSymTable.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scanner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/writeFile.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -465,6 +496,104 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+readSectionHeader.o: Functions/readSectionHeader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readSectionHeader.o -MD -MP -MF $(DEPDIR)/readSectionHeader.Tpo -c -o readSectionHeader.o `test -f 'Functions/readSectionHeader.c' || echo '$(srcdir)/'`Functions/readSectionHeader.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readSectionHeader.Tpo $(DEPDIR)/readSectionHeader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readSectionHeader.c' object='readSectionHeader.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readSectionHeader.o `test -f 'Functions/readSectionHeader.c' || echo '$(srcdir)/'`Functions/readSectionHeader.c
+
+readSectionHeader.obj: Functions/readSectionHeader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readSectionHeader.obj -MD -MP -MF $(DEPDIR)/readSectionHeader.Tpo -c -o readSectionHeader.obj `if test -f 'Functions/readSectionHeader.c'; then $(CYGPATH_W) 'Functions/readSectionHeader.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readSectionHeader.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readSectionHeader.Tpo $(DEPDIR)/readSectionHeader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readSectionHeader.c' object='readSectionHeader.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readSectionHeader.obj `if test -f 'Functions/readSectionHeader.c'; then $(CYGPATH_W) 'Functions/readSectionHeader.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readSectionHeader.c'; fi`
+
+readElfHeader.o: Functions/readElfHeader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readElfHeader.o -MD -MP -MF $(DEPDIR)/readElfHeader.Tpo -c -o readElfHeader.o `test -f 'Functions/readElfHeader.c' || echo '$(srcdir)/'`Functions/readElfHeader.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readElfHeader.Tpo $(DEPDIR)/readElfHeader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readElfHeader.c' object='readElfHeader.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readElfHeader.o `test -f 'Functions/readElfHeader.c' || echo '$(srcdir)/'`Functions/readElfHeader.c
+
+readElfHeader.obj: Functions/readElfHeader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readElfHeader.obj -MD -MP -MF $(DEPDIR)/readElfHeader.Tpo -c -o readElfHeader.obj `if test -f 'Functions/readElfHeader.c'; then $(CYGPATH_W) 'Functions/readElfHeader.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readElfHeader.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readElfHeader.Tpo $(DEPDIR)/readElfHeader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readElfHeader.c' object='readElfHeader.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readElfHeader.obj `if test -f 'Functions/readElfHeader.c'; then $(CYGPATH_W) 'Functions/readElfHeader.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readElfHeader.c'; fi`
+
+readSectionContent.o: Functions/readSectionContent.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readSectionContent.o -MD -MP -MF $(DEPDIR)/readSectionContent.Tpo -c -o readSectionContent.o `test -f 'Functions/readSectionContent.c' || echo '$(srcdir)/'`Functions/readSectionContent.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readSectionContent.Tpo $(DEPDIR)/readSectionContent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readSectionContent.c' object='readSectionContent.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readSectionContent.o `test -f 'Functions/readSectionContent.c' || echo '$(srcdir)/'`Functions/readSectionContent.c
+
+readSectionContent.obj: Functions/readSectionContent.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readSectionContent.obj -MD -MP -MF $(DEPDIR)/readSectionContent.Tpo -c -o readSectionContent.obj `if test -f 'Functions/readSectionContent.c'; then $(CYGPATH_W) 'Functions/readSectionContent.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readSectionContent.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readSectionContent.Tpo $(DEPDIR)/readSectionContent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readSectionContent.c' object='readSectionContent.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readSectionContent.obj `if test -f 'Functions/readSectionContent.c'; then $(CYGPATH_W) 'Functions/readSectionContent.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readSectionContent.c'; fi`
+
+readSymTable.o: Functions/readSymTable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readSymTable.o -MD -MP -MF $(DEPDIR)/readSymTable.Tpo -c -o readSymTable.o `test -f 'Functions/readSymTable.c' || echo '$(srcdir)/'`Functions/readSymTable.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readSymTable.Tpo $(DEPDIR)/readSymTable.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readSymTable.c' object='readSymTable.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readSymTable.o `test -f 'Functions/readSymTable.c' || echo '$(srcdir)/'`Functions/readSymTable.c
+
+readSymTable.obj: Functions/readSymTable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readSymTable.obj -MD -MP -MF $(DEPDIR)/readSymTable.Tpo -c -o readSymTable.obj `if test -f 'Functions/readSymTable.c'; then $(CYGPATH_W) 'Functions/readSymTable.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readSymTable.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readSymTable.Tpo $(DEPDIR)/readSymTable.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readSymTable.c' object='readSymTable.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readSymTable.obj `if test -f 'Functions/readSymTable.c'; then $(CYGPATH_W) 'Functions/readSymTable.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readSymTable.c'; fi`
+
+readRelocTable.o: Functions/readRelocTable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readRelocTable.o -MD -MP -MF $(DEPDIR)/readRelocTable.Tpo -c -o readRelocTable.o `test -f 'Functions/readRelocTable.c' || echo '$(srcdir)/'`Functions/readRelocTable.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readRelocTable.Tpo $(DEPDIR)/readRelocTable.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readRelocTable.c' object='readRelocTable.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readRelocTable.o `test -f 'Functions/readRelocTable.c' || echo '$(srcdir)/'`Functions/readRelocTable.c
+
+readRelocTable.obj: Functions/readRelocTable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT readRelocTable.obj -MD -MP -MF $(DEPDIR)/readRelocTable.Tpo -c -o readRelocTable.obj `if test -f 'Functions/readRelocTable.c'; then $(CYGPATH_W) 'Functions/readRelocTable.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readRelocTable.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/readRelocTable.Tpo $(DEPDIR)/readRelocTable.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/readRelocTable.c' object='readRelocTable.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o readRelocTable.obj `if test -f 'Functions/readRelocTable.c'; then $(CYGPATH_W) 'Functions/readRelocTable.c'; else $(CYGPATH_W) '$(srcdir)/Functions/readRelocTable.c'; fi`
+
+writeFile.o: Functions/writeFile.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT writeFile.o -MD -MP -MF $(DEPDIR)/writeFile.Tpo -c -o writeFile.o `test -f 'Functions/writeFile.c' || echo '$(srcdir)/'`Functions/writeFile.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/writeFile.Tpo $(DEPDIR)/writeFile.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/writeFile.c' object='writeFile.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o writeFile.o `test -f 'Functions/writeFile.c' || echo '$(srcdir)/'`Functions/writeFile.c
+
+writeFile.obj: Functions/writeFile.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT writeFile.obj -MD -MP -MF $(DEPDIR)/writeFile.Tpo -c -o writeFile.obj `if test -f 'Functions/writeFile.c'; then $(CYGPATH_W) 'Functions/writeFile.c'; else $(CYGPATH_W) '$(srcdir)/Functions/writeFile.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/writeFile.Tpo $(DEPDIR)/writeFile.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/writeFile.c' object='writeFile.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o writeFile.obj `if test -f 'Functions/writeFile.c'; then $(CYGPATH_W) 'Functions/writeFile.c'; else $(CYGPATH_W) '$(srcdir)/Functions/writeFile.c'; fi`
+
+implantation.o: Functions/implantation.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT implantation.o -MD -MP -MF $(DEPDIR)/implantation.Tpo -c -o implantation.o `test -f 'Functions/implantation.c' || echo '$(srcdir)/'`Functions/implantation.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/implantation.Tpo $(DEPDIR)/implantation.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/implantation.c' object='implantation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o implantation.o `test -f 'Functions/implantation.c' || echo '$(srcdir)/'`Functions/implantation.c
+
+implantation.obj: Functions/implantation.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT implantation.obj -MD -MP -MF $(DEPDIR)/implantation.Tpo -c -o implantation.obj `if test -f 'Functions/implantation.c'; then $(CYGPATH_W) 'Functions/implantation.c'; else $(CYGPATH_W) '$(srcdir)/Functions/implantation.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/implantation.Tpo $(DEPDIR)/implantation.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Functions/implantation.c' object='implantation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o implantation.obj `if test -f 'Functions/implantation.c'; then $(CYGPATH_W) 'Functions/implantation.c'; else $(CYGPATH_W) '$(srcdir)/Functions/implantation.c'; fi`
 
 .l.c:
 	$(AM_V_LEX)$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
@@ -811,13 +940,21 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-		-rm -f ./$(DEPDIR)/ARM_runner_example.Po
+		-rm -f ./$(DEPDIR)/ARM_runner.Po
+	-rm -f ./$(DEPDIR)/ARM_runner_example.Po
 	-rm -f ./$(DEPDIR)/arm_simulator_interface.Po
 	-rm -f ./$(DEPDIR)/csapp.Po
 	-rm -f ./$(DEPDIR)/debug.Po
 	-rm -f ./$(DEPDIR)/gdb_protocol.Po
+	-rm -f ./$(DEPDIR)/implantation.Po
+	-rm -f ./$(DEPDIR)/readElfHeader.Po
+	-rm -f ./$(DEPDIR)/readRelocTable.Po
+	-rm -f ./$(DEPDIR)/readSectionContent.Po
+	-rm -f ./$(DEPDIR)/readSectionHeader.Po
+	-rm -f ./$(DEPDIR)/readSymTable.Po
 	-rm -f ./$(DEPDIR)/scanner.Po
 	-rm -f ./$(DEPDIR)/util.Po
+	-rm -f ./$(DEPDIR)/writeFile.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -865,13 +1002,21 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-		-rm -f ./$(DEPDIR)/ARM_runner_example.Po
+		-rm -f ./$(DEPDIR)/ARM_runner.Po
+	-rm -f ./$(DEPDIR)/ARM_runner_example.Po
 	-rm -f ./$(DEPDIR)/arm_simulator_interface.Po
 	-rm -f ./$(DEPDIR)/csapp.Po
 	-rm -f ./$(DEPDIR)/debug.Po
 	-rm -f ./$(DEPDIR)/gdb_protocol.Po
+	-rm -f ./$(DEPDIR)/implantation.Po
+	-rm -f ./$(DEPDIR)/readElfHeader.Po
+	-rm -f ./$(DEPDIR)/readRelocTable.Po
+	-rm -f ./$(DEPDIR)/readSectionContent.Po
+	-rm -f ./$(DEPDIR)/readSectionHeader.Po
+	-rm -f ./$(DEPDIR)/readSymTable.Po
 	-rm -f ./$(DEPDIR)/scanner.Po
 	-rm -f ./$(DEPDIR)/util.Po
+	-rm -f ./$(DEPDIR)/writeFile.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
