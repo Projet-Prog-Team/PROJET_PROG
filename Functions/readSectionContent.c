@@ -64,25 +64,15 @@ SectionContent * loadSectionContent(FILE * file, Elf32_Main * ELF){
 
 
 void printSectionContent(Elf32_Main * ELF){
-
-    tempTab * tab = malloc(sizeof(tempTab)*ELF->header.e_shnum);
-
     for (int i=0; i < ELF->header.e_shnum; i++){
-        tempTab elem;
-        elem.indice =  i;
-        elem.offset = ELF->sectHeader[i].sh_offset;
-        tab[i] = elem;
-    }
-
-    for (int i=0; i < ELF->header.e_shnum; i++){
-        printf("Section %d: %d\n",i,ELF->sectionContent[tab[i].indice].size);
-        for (int j=0; j < ELF->sectionContent[tab[i].indice].size; j++){
+        printf("Section %d: %d\n",i,ELF->sectionContent[i].size);
+        for (int j=0; j < ELF->sectionContent[i].size; j++){
             if (j%16 == 0 && j!=0){
                 printf("\n");
             } else if (j%4 == 0 && j!=0){
                 printf(" ");
             }
-            printf("%02x",ELF->sectionContent[tab[i].indice].section[j]);
+            printf("%02x",ELF->sectionContent[i].section[j]);
         }
         printf("\n\n");
     }

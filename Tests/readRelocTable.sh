@@ -2,7 +2,7 @@
 echo "Test de la lecture des tables de réimplantations :"
 for file in `grep -rIL . ./Examples_loader`
 do
-    ./ARM_runner $file temp.txt -r rere > myHeader.txt
+    ./ARM_runner --source $file -r > myHeader.txt
     arm-none-eabi-readelf -r $file | grep -v Relocation | grep -v Offset > trueHeader.txt
     if [ "$(diff -EZbwB myHeader.txt trueHeader.txt)" ]
     then
@@ -12,5 +12,5 @@ do
         echo "$file : OK"
     fi
 done
-rm trueHeader.txt myHeader.txt temp.txt
+rm trueHeader.txt myHeader.txt
 
