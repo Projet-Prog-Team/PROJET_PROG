@@ -17,9 +17,12 @@ void deleteRel(Elf32_Main * ELF){
             }
             //DELETE REL from sectionContent
             for(int j=i+1; j < ELF->header.e_shnum; j++){
-                ELF->sectionContent[j-1].section = ELF->sectionContent[j].section;
-                ELF->sectionContent[j-1].size = ELF->sectionContent[j].size;
+                ELF->sectionContent[j-1].size = ELF->sectionContent[j].size;     
+                ELF->sectionContent[j-1].section = realloc(ELF->sectionContent[j-1].section, ELF->sectionContent[j].size); 
+                memmove(ELF->sectionContent[j-1].section, ELF->sectionContent[j].section, ELF->sectionContent[j-1].size); 
             }
+            free(ELF->sectionContent[ELF->header.e_shnum-1].section);
+
             for(int k=0; k < ELF->header.e_shnum; k++){
                 //OFFSET modif
                 if (ELF->sectHeader[k].sh_offset > offsetRel){
