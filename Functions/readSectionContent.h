@@ -7,10 +7,10 @@
 #include <elf.h>
 #include "../structure.h"
 
-// void printRawSectionContent(FILE *file, Elf32_Main * ELF);
-
+// Charge le contenu de toutes les sections dans la structure
 SectionContent * loadSectionContent(FILE * file, Elf32_Main * ELF);
 
+// Affiche le contenu de toutes les sections à partir de la structure
 void printSectionContent(Elf32_Main * ELF);
 
 #endif

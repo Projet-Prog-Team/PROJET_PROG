@@ -4,27 +4,37 @@
 Elf32_Rel ** loadRelocTable(FILE * f, Elf32_Main * ELF){
     int i = 0;
     int k = 0;
-    Elf32_Rel **Tab = malloc(sizeof(Elf32_Rel *));
-    // Parcours de toutes les sections
-    while ((i < ELF->header.e_shnum)) {
-        // Si c'est une section de réimplantation
-        if ((ELF->sectHeader[i].sh_type == 9)) {
+    Elf32_Rel **Tab = malloc(sizeof(Elf32_Rel *));  
+    if (Tab == NULL) {
+        printf("Error: Unable to allocate relocation table memory\n");
+        exit(1);
+    }
+    while ((i < ELF->header.e_shnum)) {             // Parcours de toutes les sections
+        if ((ELF->sectHeader[i].sh_type == 9)) {    // Si c'est une section de réimplantation
             Tab = realloc(Tab, sizeof(Elf32_Rel *) * (k + 1));
             Tab[k] = malloc(ELF->sectHeader[i].sh_size);
+            if (Tab[k] == NULL) {
+                printf("Error: Unable to allocate one relocation table memory\n");
+                exit(1);
+            }
             fseek(f, ELF->sectHeader[i].sh_offset, SEEK_SET);
             ELF->tabSecRel.TabNb[k] = ELF->sectHeader[i].sh_size / 8;
             ELF->tabSecRel.nbSections++;
-            for (int j = 0; j < ELF->sectHeader[i].sh_size / 8; j++) {
-                fread(&Tab[k][j].r_offset, 4, 1, f);
+            for (int j = 0; j < ELF->sectHeader[i].sh_size / 8; j++) {  // Pour chaque entrée de la section de réimplantation courante
+                if (fread(&Tab[k][j].r_offset, 4, 1, f) != 1) {
+                    exit(1);
+                }
                 Tab[k][j].r_offset = bswap_32(Tab[k][j].r_offset);
-                fread(&Tab[k][j].r_info, 4, 1, f);
+                if (fread(&Tab[k][j].r_info, 4, 1, f) != 1){
+                    exit(1);
+                }
                 Tab[k][j].r_info = bswap_32(Tab[k][j].r_info);
             }
             k++;
         }
         i++;
     }
-    if (k == 0) {
+    if (k == 0) {   // Si aucune table de réimplantation
         for(int i = 0; i < ELF->tabSecRel.nbSections; i++) {
             free(Tab[i]);
         }
@@ -68,33 +78,14 @@ void printRelocTable(FILE * f, Elf32_Main * ELF){
                 printf("%08x\t", ELF->symTable[symIndex].st_value);
                 
                 // Sym Name
-
-                int scan, compteur;
-                char nom_section[512];
-                char c;
+                char * nom_section;
                 if (ELF->symTable[symIndex].st_value == 0) {
-                    fseek(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[ELF->symTable[symIndex].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom du symbole
-                    compteur = 0;
-                    scan = fscanf(f, "%c", &c);  
-                    while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
-                        nom_section[compteur] = c;
-                        scan = fscanf(f, "%c", &c);
-                        compteur++;
-                    }
-                    nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-                    printf("%s\t", nom_section);
+                    nom_section = printName(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[ELF->symTable[symIndex].st_shndx].sh_name);
                 } else {
-                    fseek(f, ELF->sectHeader[ELF->header.e_shstrndx -1].sh_offset + ELF->symTable[symIndex].st_name, SEEK_SET); // On se rend à la position du nom du symbole
-                    compteur = 0;
-                    scan = fscanf(f, "%c", &c);  
-                    while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de symbole dans la string table
-                        nom_section[compteur] = c;
-                        scan = fscanf(f, "%c", &c);
-                        compteur++;
-                    }
-                    nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-                    printf("%s\t", nom_section);
+                    nom_section = printName(f, ELF->sectHeader[ELF->header.e_shstrndx -1].sh_offset + ELF->symTable[symIndex].st_name);
                 }
+                printf("%s\t", nom_section);
+                free(nom_section);
                 printf("\n");      
             }
             printf("\n");                    

@@ -3,11 +3,15 @@
 
 void deleteRel(Elf32_Main * ELF){
     int i=0;
+    //Parcour de toutes les section header
     while(i < ELF->header.e_shnum){
+        //Si section de type REL
         if (ELF->sectHeader[i].sh_type==SHT_REL){
+            //Si la table des string est après la section a supprimer, il faut décrémenter de son index dans le header
             if (ELF->header.e_shstrndx>i){
                 ELF->header.e_shstrndx--;
             }
+            //On supprime un section donc l'offset des section header doit être modifié
             ELF->header.e_shoff -= ELF->sectHeader[i].sh_size;
             int sizeRel = ELF->sectHeader[i].sh_size;
             int offsetRel = ELF->sectHeader[i].sh_offset;
@@ -23,6 +27,7 @@ void deleteRel(Elf32_Main * ELF){
             }
             free(ELF->sectionContent[ELF->header.e_shnum-1].section);
 
+            //Parcour de tout les sections header
             for(int k=0; k < ELF->header.e_shnum; k++){
                 //OFFSET modif
                 if (ELF->sectHeader[k].sh_offset > offsetRel){
@@ -30,7 +35,6 @@ void deleteRel(Elf32_Main * ELF){
                 }
                 //LINK modif
                 int linkCondition = ELF->sectHeader[k].sh_type == SHT_HASH || ELF->sectHeader[k].sh_type == SHT_DYNAMIC || ELF->sectHeader[k].sh_type == SHT_SYMTAB;
-
                 if (ELF->sectHeader[k].sh_link > i && linkCondition){
                     ELF->sectHeader[k].sh_link--;
                 }
@@ -51,31 +55,20 @@ void deleteRel(Elf32_Main * ELF){
 
 
 void correctSymTable(FILE * f, Elf32_Main * ELF, uint32_t text, uint32_t data) {
-    int scan, compteur;
-    char nom_section[512];
-    char c;
+    char * nom_section;
     // Modification de la table des symboles
     for (int j = 0; j < ELF->nb_symboles; j++) {
-        fseek(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[ELF->symTable[j].st_shndx].sh_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
-        compteur = 0;
-        scan = fscanf(f, "%c", &c);  
-        while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de la section dans la string table
-            nom_section[compteur] = c;
-            scan = fscanf(f, "%c", &c);
-            compteur++;
-        }
-        nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-        //printf("Symbole %d : %s\n",j,nom_section);
-        //printf("valeur avant: %d\n",ELF->symTable[j].st_value);
+        nom_section = printName(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[ELF->symTable[j].st_shndx].sh_name);
         if (!strcmp(nom_section, ".text")) {
             ELF->symTable[j].st_value += text;
         } else if (!strcmp(nom_section, ".data")) {
             ELF->symTable[j].st_value += data;
         }
-        //printf("valeur apres: %d\n\n",ELF->symTable[j].st_value);
+        free(nom_section);
     }
 }
 
+// Pour calculer le P dans les relocations
 uint32_t sign_extend16(uint16_t P) {
     uint32_t masque = 0;
     if (P>>15 == 1) { // Si P négatif
