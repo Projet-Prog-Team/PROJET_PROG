@@ -5,6 +5,7 @@
 #include "arm_simulator_interface.h"
 #include "Functions/readSectionHeader.h"
 #include "Functions/readSectionContent.h"
+
 #include "Functions/readElfHeader.h"
 #include "Functions/readSymTable.h"
 #include "Functions/readRelocTable.h"
@@ -105,7 +106,9 @@ int main(int argc, char *argv[]) {
 			printf("\n");
 			exit(0);
 		case 't':
+			deleteRel(&ELF);
 			correctSymTable(f_source,&ELF, strtol(optarg,NULL,16), 0);
+			correctABSReloc(&ELF);
 			if(argc>=3){
 				writeHeader(&ELF, f_dest);
 				writeSectionContent(&ELF, f_dest);

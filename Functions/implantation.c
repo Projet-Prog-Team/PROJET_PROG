@@ -73,4 +73,64 @@ void correctSymTable(FILE * f, Elf32_Main * ELF, uint32_t text, uint32_t data) {
     }
 }
 
+uint32_t sign_extend16(uint16_t P) {
+    uint32_t masque = 0;
+    if (P>>15 == 1) { // Si P négatif
+        return  ~masque & P;
+    } else {          // P positif
+        return masque | P;
+    }
+}
 
+uint32_t sign_extend8(uint8_t P) {
+    uint32_t masque = 0;
+    if (P>>7 == 1) { // Si P négatif
+        return  ~masque & P;
+    } else {          // P positif
+        return masque | P;
+    }
+}
+
+
+void correctABSReloc(Elf32_Main * ELF) {
+    uint32_t addend;
+    uint16_t p16;
+    uint8_t p8;
+    uint32_t section_to_modify_index;
+    unsigned char *to_modify;
+    // Pour chaques tables de relocations
+    for (int i = 0; i < ELF->tabSecRel.nbSections; i++) {
+        // Pour chaques entrées
+        for (int j = 0; j < ELF->tabSecRel.TabNb[i]; j++) {
+            section_to_modify_index = ELF->sectHeader[ELF->symTable[ELF32_R_SYM(ELF->relTable[i][j].r_info)].st_shndx].sh_info;
+            to_modify = ELF->sectionContent[section_to_modify_index].section;
+            switch(ELF32_R_TYPE(ELF->relTable[i][j].r_info)) {
+                case 2: //R_ARM_ABS32
+                    // On fais rien car Addend vaut 0, T vaut 0 et S à déjà était mis à jour
+                    // avec les bonnes addresses lors de l'étape 7 pour ce cas
+                    break;
+                case 5: //R_ARM_ABS16
+                    p16 = ELF->sectHeader[ELF->symTable[ELF32_R_SYM(ELF->relTable[i][j].r_info)].st_shndx].sh_addr + ELF->relTable[i][j].r_offset;
+                    addend = sign_extend16(p16);
+                    *(to_modify + ELF->relTable[i][j].r_offset) = ELF->symTable[ELF32_R_SYM(ELF->relTable[i][j].r_info)].st_value + addend;
+                    break;
+                case 8: //R_ARM_ABS8
+                    p8 = ELF->sectHeader[ELF->symTable[ELF32_R_SYM(ELF->relTable[i][j].r_info)].st_shndx].sh_addr + ELF->relTable[i][j].r_offset;
+                    addend = sign_extend8(p8);
+                    *(to_modify + ELF->relTable[i][j].r_offset) = ELF->symTable[ELF32_R_SYM(ELF->relTable[i][j].r_info)].st_value + addend;
+                    break;
+                case 28://R_ARM_CALL
+                case 29://R_ARM_JUMP24
+                    //all static data relocations have size 4, alignment 1 and write the full 32-bit result to the place
+                    // S = ELF->symTable[ELF32_R_SYM(ELF->relTable[i][j].r_info)].st_value
+                    // T = ?
+                    // P = ?
+                    // insn = ?
+                    // *(to_modify + ELF->relTable[i][j].r_offset) = (((S + sign_extend (insn[23:0] << 2)) | T) - P )& 0x03FFFFFE
+                    break;
+                default:
+                    break;
+            }
+        } 
+    }
+}

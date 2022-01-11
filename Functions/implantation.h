@@ -11,4 +11,5 @@ void deleteRel(Elf32_Main * ELF);
 
 void correctSymTable(FILE * f, Elf32_Main * ELF, uint32_t text, uint32_t data);
 
+void correctABSReloc(Elf32_Main * ELF);
 #endif
