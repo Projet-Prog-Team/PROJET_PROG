@@ -4,10 +4,11 @@
 #include <stdlib.h>
 #include <elf.h>
 #include <byteswap.h>
+#include "../structure.h"
 
-Elf32_Ehdr * readHeaderAffichage(const char * file);
+Elf32_Ehdr loadHeader(FILE * elfFile);
 
-Elf32_Ehdr * readHeader(const char * file);
+void printHeader(Elf32_Main * ELF_main);
 
 #endif
 

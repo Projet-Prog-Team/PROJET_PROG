@@ -4,13 +4,11 @@
 #include <stdlib.h>
 #include <elf.h>
 #include <byteswap.h>
-#include "readSectionHeader.h"
+#include "../structure.h"
 
-Elf32_Sym *loadSymTable(FILE *f, Elf32_Shdr * sectionHeader, Elf32_Ehdr header, int * nb_symboles);
+Elf32_Sym *loadSymTable(FILE *f, Elf32_Main * ELF);
 
-void printSymTable(Elf32_Sym * Tab, Elf32_Shdr * sectionHeader, Elf32_Ehdr header, FILE *f, int nb_symboles);
-
-Elf32_Sym *readSymTable(const char * file, int affichage);
+void printSymTable(FILE * f, Elf32_Main * ELF);
 
 
 #endif

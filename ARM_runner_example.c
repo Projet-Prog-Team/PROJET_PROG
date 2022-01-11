@@ -25,11 +25,6 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdlib.h>
 #include "debug.h"
 #include "arm_simulator_interface.h"
-#include "Functions/readSectionHeader.h"
-#include "Functions/readSectionContent.h"
-#include "Functions/readElfHeader.h"
-#include "Functions/readSymTable.h"
-#include "Functions/readRelocTable.h"
 
 void usage(char *name) {
 	fprintf(stderr, "Usage:\n"
@@ -79,7 +74,7 @@ int main(int argc, char *argv[]) {
 	hostname = NULL;
 	servicename = NULL;
 
-	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j:r:b:a", longopts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "S:H:d:s:h:j:r:b:a:k", longopts, NULL)) != -1) {
 		switch(opt) {
 		case 'H':
 			hostname = optarg;
@@ -93,21 +88,25 @@ int main(int argc, char *argv[]) {
 		case 'd':
 			add_debug_to(optarg);
 			break;
-		case 's':
-			readSectionsHeader(argv[2], 1);
-			exit(0);
-		case 'j':
-			readHeaderAffichage(argv[2]);
-			exit(0);
-		case 'b':
-			readSymTable(argv[2], 1);
-			exit(0);
-		case 'a':
-			readRelocTable(argv[2], 1);
-			exit(0);
-		case 'r' :
-			readRawSectionContent(argv[2]);
-			break;
+		// case 's':
+		// 	readSectionsHeader(argv[2], 1);
+		// 	exit(0);
+		// case 'j':
+		// 	readHeaderAffichage(argv[2]);
+		// 	exit(0);
+		// case 'b':
+		// 	readSymTable(argv[2], 1);
+		// 	exit(0);
+		// case 'a':
+		// 	readRelocTable(argv[2], 1);
+		// 	exit(0);
+		// case 'k':
+		// 	readRawSectionContent(argv[2]);
+		// 	exit(0);
+		// case 'r' :
+		// 	//writeSectionContentFile(argv[2], "resultat.o");
+		// 	renumSect(argv[2], "resultat.o");
+		// 	exit(0);
 		default:
 			fprintf(stderr, "Unrecognized option %c\n", opt);
 			usage(argv[0]);

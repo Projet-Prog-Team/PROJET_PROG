@@ -17,6 +17,7 @@ SUBDIRS+=. Examples_loader
 
 bin_PROGRAMS=
 bin_PROGRAMS+=ARM_runner_example
+bin_PROGRAMS+=ARM_runner
 
 
 COMMON=debug.h debug.c util.h util.c
@@ -24,7 +25,9 @@ COMMON=debug.h debug.c util.h util.c
 EXTRA_DIST=filtre.pl
 SIMULATOR_INTERFACE=csapp.h csapp.c scanner.h scanner.l gdb_protocol.h gdb_protocol.c arm_simulator_interface.h arm_simulator_interface.c
 
-ARM_runner_example_SOURCES=$(COMMON) $(SIMULATOR_INTERFACE) ARM_runner_example.c Functions/readSectionHeader.c Functions/readElfHeader.c  Functions/readSectionContent.c Functions/readSymTable.c Functions/readRelocTable.c
+ARM_runner_example_SOURCES=$(COMMON) $(SIMULATOR_INTERFACE) ARM_runner_example.c
+
+ARM_runner_SOURCES=$(COMMON) $(SIMULATOR_INTERFACE)  ARM_runner.c Functions/readSectionHeader.c Functions/readElfHeader.c  Functions/readSectionContent.c Functions/readSymTable.c Functions/readRelocTable.c Functions/writeFile.c Functions/implantation.c structure.h
 
 EXTRA_DIST+=sample_run.sh
 

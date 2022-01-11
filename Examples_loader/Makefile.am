@@ -17,10 +17,11 @@ AM_LDFLAGS+=-Wl,--section-start -Wl,.text=0x20 -Wl,--section-start -Wl,.data=0x2
 # Big endian
 AM_LDFLAGS+=-Wl,-EB
 
-noinst_PROGRAMS=example1 example2 example3 example4
+noinst_PROGRAMS=example1 example2 example2Copy example3 example4
 
 example1_SOURCES=example1.s
 example2_SOURCES=example2.s
+example2Copy_SOURCES=example2Copy.s
 example3_SOURCES=example3.s
 example4_SOURCES=example4.s
 

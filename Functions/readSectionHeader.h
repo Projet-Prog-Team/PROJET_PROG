@@ -5,12 +5,10 @@
 #include <elf.h>
 #include <byteswap.h>
 #include "debug.h"
-#include "readElfHeader.h"
+#include "../structure.h"
 
-Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Ehdr header);
+Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Main * ELF);
 
-void printSectionHeader(Elf32_Shdr * Tab, Elf32_Ehdr header, FILE *f);
-
-Elf32_Shdr *readSectionsHeader(const char * file, int affichage);
+void printSectionHeader(FILE *f, Elf32_Main * ELF);
 
 #endif
