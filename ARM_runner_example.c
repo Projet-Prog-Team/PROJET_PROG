@@ -88,25 +88,6 @@ int main(int argc, char *argv[]) {
 		case 'd':
 			add_debug_to(optarg);
 			break;
-		// case 's':
-		// 	readSectionsHeader(argv[2], 1);
-		// 	exit(0);
-		// case 'j':
-		// 	readHeaderAffichage(argv[2]);
-		// 	exit(0);
-		// case 'b':
-		// 	readSymTable(argv[2], 1);
-		// 	exit(0);
-		// case 'a':
-		// 	readRelocTable(argv[2], 1);
-		// 	exit(0);
-		// case 'k':
-		// 	readRawSectionContent(argv[2]);
-		// 	exit(0);
-		// case 'r' :
-		// 	//writeSectionContentFile(argv[2], "resultat.o");
-		// 	renumSect(argv[2], "resultat.o");
-		// 	exit(0);
 		default:
 			fprintf(stderr, "Unrecognized option %c\n", opt);
 			usage(argv[0]);

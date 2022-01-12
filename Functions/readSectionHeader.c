@@ -4,6 +4,10 @@
 
 Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Main * ELF) {
     Elf32_Shdr *Tab = malloc(ELF->header.e_shentsize * ELF->header.e_shnum);   // Allocation d'un tableau de structure (16 * 40 octets)
+    if (Tab == NULL) {
+        printf("Error: Unable to allocate section header table\n");
+        exit(1);
+    }
     if (Tab == NULL){
         printf("Erreur d'allocation mémoire du tableau\n");
         return NULL;
@@ -25,112 +29,101 @@ Elf32_Shdr *loadTabSectionHeader(FILE *f, Elf32_Main * ELF) {
 }
 
 void printSectionHeader(FILE *f, Elf32_Main * ELF) {
-    int scan, compteur;
-    char nom_section[512];
-    char c;
+    char * nom_section;
     for(int i = 0; i < ELF->header.e_shnum; i++) {                        // Pour chaque section
-        printf("[%d]", i);
+        printf("[%d]\t", i);
         
-        fseek(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[i].sh_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
-
-        compteur = 0;
-        scan = fscanf(f, "%c", &c);  
-        while ((scan != EOF) && (c != '\0') && (compteur < 17)) {   // Lecture du nom de la section dans la string table
-            nom_section[compteur] = c;
-            scan = fscanf(f, "%c", &c);
-            compteur++;
-        }
-        nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-        printf("   %s", nom_section);                       // Affichages...
+        nom_section = printName(f, ELF->sectHeader[ELF->header.e_shstrndx].sh_offset + ELF->sectHeader[i].sh_name);
+        printf("%s\t", nom_section);                       // Affichages...
+        free(nom_section);
 
         // Switch pour afficher le nom du type plutôt que son numéro
         switch (ELF->sectHeader[i].sh_type) {
             case 0:
-                printf("  NULL");
+                printf("NULL\t");
                 break;
             case 1:
-                printf("  PROGBITS");
+                printf("PROGBITS\t");
                 break;
             case 2:
-                printf("  SYMTAB");
+                printf("SYMTAB\t");
                 break;
             case 3:
-                printf("  STRTAB");
+                printf("STRTAB\t");
                 break;
             case 4:
-                printf("  RELA");
+                printf("RELA\t");
                 break;
             case 5:
-                printf("  HASH");
+                printf("HASH\t");
                 break;
             case 6:
-                printf("  DYNAMIC");
+                printf("DYNAMIC\t");
                 break;
             case 7:
-                printf("  NOTE");
+                printf("NOTE\t");
                 break;
             case 8:
-                printf("  NOBITS");
+                printf("NOBITS\t");
                 break;
             case 9:
-                printf("  REL");
+                printf("REL\t");
                 break;
             case 10:
-                printf("  SHLIB");
+                printf("SHLIB\t");
                 break;
             case 11:
-                printf("  DYNSYM");
+                printf("DYNSYM\t");
                 break;
             case 1879048195:
-                printf("   ARM_ATTRIBUTES");
+                printf("ARM_ATTRIBUTES\t");
                 break;
             case 1879048192:
-                printf("  LOPROC");
+                printf("LOPROC\t");
                 break;
             case 2147483647:
-                printf("  HIPROC");
+                printf("HIPROC\t");
                 break;
             case 2147483648:
-                printf("   LOUSER");
+                printf("LOUSER\t");
                 break;
             case 4294967295:
-                printf("   HIUSER");
+                printf("HIUSER\t");
                 break;
             default:
-                printf("   UNKNOWN");
+                printf("UNKNOWN");
                 break;
         }
-        printf("  %08x", ELF->sectHeader[i].sh_addr);
-        printf("  %06x", ELF->sectHeader[i].sh_offset);
-        printf("  %06x", ELF->sectHeader[i].sh_size);
-        printf("  %02x", ELF->sectHeader[i].sh_entsize);
-        printf("   ");
+        printf("%08x\t", ELF->sectHeader[i].sh_addr);
+        printf("%06x\t", ELF->sectHeader[i].sh_offset);
+        printf("%06x\t", ELF->sectHeader[i].sh_size);
+        printf("%02x\t", ELF->sectHeader[i].sh_entsize);
 
         if (ELF->sectHeader[i].sh_flags & 1) {
-            printf("W");
+            printf("W\t");
         }
         if (ELF->sectHeader[i].sh_flags & 2) {
-            printf("A");
+            printf("A\t");
         }
         if (ELF->sectHeader[i].sh_flags & 4) {
-            printf("X");
+            printf("X\t");
         }
         if (ELF->sectHeader[i].sh_flags & 16) {
-            printf("M");
+            printf("M\t");
         }
         if (ELF->sectHeader[i].sh_flags & 32) {
-            printf("S");
+            printf("S\t");
         }
         if (ELF->sectHeader[i].sh_flags & 64) {
-            printf("I");
+            printf("I\t");
         }
         if (ELF->sectHeader[i].sh_flags & 128) {
-            printf("L");
+            printf("L\t");
         }
 
         
-        printf("  %d", ELF->sectHeader[i].sh_link);
-        printf("  %d", ELF->sectHeader[i].sh_info);
-        printf("  %x\n", ELF->sectHeader[i].sh_addralign);
+        printf("%d\t", ELF->sectHeader[i].sh_link);
+        printf("%d\t", ELF->sectHeader[i].sh_info);
+        printf("%x\n", ELF->sectHeader[i].sh_addralign);
     }
 }

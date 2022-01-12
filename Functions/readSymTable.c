@@ -2,28 +2,32 @@
 
 Elf32_Sym *loadSymTable(FILE *f, Elf32_Main * ELF) {
     int i = 0;
-    while ((i < ELF->header.e_shnum) && (ELF->sectHeader[i].sh_type != 2)) {
+    while ((i < ELF->header.e_shnum) && (ELF->sectHeader[i].sh_type != 2)) { // Tant que i n'est pas l'indice de la table de symboles
         i++;
     }
-    if (i >= ELF->header.e_shnum) {
+    if (i >= ELF->header.e_shnum) { // Si il n'y a pas de table des symboles
         ELF->nb_symboles = -1;
         return NULL;
-    } else {
+    } else {    // Il y a une table des symboles
         Elf32_Sym *Tab = malloc(ELF->sectHeader[i].sh_size * 16);
+        if (Tab == NULL) {
+            printf("Error: Unable to allocate Symbol Table memory\n");
+            return NULL;
+        }
         fseek(f, ELF->sectHeader[i].sh_offset, SEEK_SET);
-        for (int j = 0; j < ELF->sectHeader[i].sh_size / 16; j++) {
-            fread(&Tab[j].st_name, 4, 1, f);
+        for (int j = 0; j < ELF->sectHeader[i].sh_size / 16; j++) { // Chargement de chaque entrée de la table des symboles dans la structure
+            if(fread(&Tab[j].st_name, 4, 1, f) != 1) {exit(1);}
             Tab[j].st_name = bswap_32(Tab[j].st_name);
-            fread(&Tab[j].st_value, 4, 1, f);
+            if(fread(&Tab[j].st_value, 4, 1, f) != 1) {exit(1);}
             Tab[j].st_value = bswap_32(Tab[j].st_value);
-            fread(&Tab[j].st_size, 4, 1, f);
+            if(fread(&Tab[j].st_size, 4, 1, f) != 1) {exit(1);}
             Tab[j].st_size = bswap_32(Tab[j].st_size);
-            fread(&Tab[j].st_info, 1, 1, f);
-            fread(&Tab[j].st_other, 1, 1, f);
-            fread(&Tab[j].st_shndx, 2, 1, f);
+            if(fread(&Tab[j].st_info, 1, 1, f) != 1) {exit(1);}
+            if(fread(&Tab[j].st_other, 1, 1, f) != 1) {exit(1);}
+            if(fread(&Tab[j].st_shndx, 2, 1, f) != 1) {exit(1);}
             Tab[j].st_shndx = bswap_16(Tab[j].st_shndx);
         }
-        ELF->nb_symboles = ELF->sectHeader[i].sh_size / 16;
+        ELF->nb_symboles = ELF->sectHeader[i].sh_size / 16;  // Calcul du nombre de symboles
         return Tab;
     }
 }
@@ -100,19 +104,13 @@ void printSymTable(FILE * f, Elf32_Main * ELF) {
                     break;    
             }
 
-            int scan, compteur;
-            char nom_section[512];
-            char c;
-            fseek(f, ELF->sectHeader[ELF->header.e_shstrndx - 1].sh_offset + ELF->symTable[j].st_name, SEEK_SET); // On se rend à la position du nom de la section dans le fichier
-            compteur = 0;
-            scan = fscanf(f, "%c", &c);  
-            while ((scan != EOF) && (c != '\0')) {   // Lecture du nom de la section dans la string ELF->symTablele
-                nom_section[compteur] = c;
-                scan = fscanf(f, "%c", &c);
-                compteur++;
-            }
-            nom_section[compteur] = '\0';              // Sans oublier d'ajouter le \0 de fin de séquence
-            printf("%s\t", nom_section);              // Affichages...
+            char * nom_section;
+
+            nom_section = printName(f, ELF->sectHeader[ELF->header.e_shstrndx - 1].sh_offset + ELF->symTable[j].st_name);
+            printf("%s\t", nom_section);
+
+            free(nom_section);
+
             printf("\n");
         }
     }

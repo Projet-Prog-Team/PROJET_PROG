@@ -21,9 +21,29 @@ Contact: Guillaume.Huard@imag.fr
          38330 Montbonnot Saint-Martin
 */
 #include "util.h"
-#include <stdint.h>
 
 int is_big_endian() {
     static uint32_t one = 1;
     return ((* (uint8_t *) &one) == 0);
 }
+
+char * printName(FILE * f, int offset){
+    int scan, compteur;
+    char * nom_section = malloc(sizeof(char) * 512);
+    if (nom_section == NULL) {
+        printf("Error: Unable to allocate section name memory\n");
+        exit(1);
+    }
+    char c;
+    fseek(f, offset, SEEK_SET); // On se rend à la position du nom du symbole
+    compteur = 0;
+    scan = fscanf(f, "%c", &c);  
+    while ((scan != EOF) && (c != '\0') && (compteur < 17)) {   // Lecture du nom de symbole dans la string table
+        nom_section[compteur] = c;
+        scan = fscanf(f, "%c", &c);
+        compteur++;
+    }
+    nom_section[compteur] = '\0';
+    return nom_section;
+}
+

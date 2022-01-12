@@ -6,97 +6,97 @@ void writeHeader(Elf32_Main * ELF, FILE * fdest){
     uint16_t temp16;
     uint32_t temp32;
 
-    fwrite(&ELF->header.e_ident[EI_MAG0],1,1,fdest);
-    fwrite(&ELF->header.e_ident[EI_MAG1],1,1,fdest);
-    fwrite(&ELF->header.e_ident[EI_MAG2],1,1,fdest);
-    fwrite(&ELF->header.e_ident[EI_MAG3],1,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_MAG0],1,1,fdest) != 1) {exit(1);}
+    if (fwrite(&ELF->header.e_ident[EI_MAG1],1,1,fdest) != 1) {exit(1);}
+    if (fwrite(&ELF->header.e_ident[EI_MAG2],1,1,fdest) != 1) {exit(1);}
+    if (fwrite(&ELF->header.e_ident[EI_MAG3],1,1,fdest) != 1) {exit(1);}
 
     //32 or 64 bits
-    fwrite(&ELF->header.e_ident[EI_CLASS],1,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_CLASS],1,1,fdest) != 1) {exit(1);}
 
     //Endianess
-    fwrite(&ELF->header.e_ident[EI_DATA],1,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_DATA],1,1,fdest) != 1) {exit(1);}
 
     //Version
-    fwrite(&ELF->header.e_ident[EI_VERSION],1,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_VERSION],1,1,fdest) != 1) {exit(1);}
 
     //ABI
-    fwrite(&ELF->header.e_ident[EI_OSABI],1,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_OSABI],1,1,fdest) != 1) {exit(1);}
 
     //ABI version
-    fwrite(&ELF->header.e_ident[EI_ABIVERSION],1,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_ABIVERSION],1,1,fdest) != 1) {exit(1);}
 
     //7 useless bytes
-    fwrite(&ELF->header.e_ident[EI_PAD],7,1,fdest);
+    if (fwrite(&ELF->header.e_ident[EI_PAD],7,1,fdest) != 1) {exit(1);}
 
     //File type
     temp16 = bswap_16(ELF->header.e_type);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
     
 
     //Target machine
     temp16 = bswap_16(ELF->header.e_machine);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
     
 
     //Version
     temp32 = bswap_32(ELF->header.e_version);
-    fwrite(&temp32,4,1,fdest);
+    if (fwrite(&temp32,4,1,fdest) != 1) {exit(1);}
     
 
     //Entry point
     if (ELF->header.e_ident[EI_CLASS] == 1){
         
         temp32 = bswap_32(ELF->header.e_entry);
-        fwrite(&temp32,4,1,fdest);
+        if (fwrite(&temp32,4,1,fdest) != 1) {exit(1);}
         
     }else{
-        fwrite(&ELF->header.e_entry,8,1,fdest);
+        if (fwrite(&ELF->header.e_entry,8,1,fdest) != 1) {exit(1);}
     }
 
     //Program headers offset
     if (ELF->header.e_ident[EI_CLASS] == 1){
         temp32 = bswap_32(ELF->header.e_phoff);
-        fwrite(&temp32,4,1,fdest); 
+        if (fwrite(&temp32,4,1,fdest) != 1) {exit(1);}
     }else{
-        fwrite(&ELF->header.e_phoff,8,1,fdest);
+        if (fwrite(&ELF->header.e_phoff,8,1,fdest) != 1) {exit(1);}
     }
 
     //Section headers offset
     if (ELF->header.e_ident[EI_CLASS] == 1){
         temp32 = bswap_32(ELF->header.e_shoff);
-        fwrite(&temp32,4,1,fdest);
+        if (fwrite(&temp32,4,1,fdest) != 1) {exit(1);}
     }else{
-        fwrite(&ELF->header.e_shoff,8,1,fdest);
+        if (fwrite(&ELF->header.e_shoff,8,1,fdest) != 1) {exit(1);}
     }
 
     //Flags
     temp32 = bswap_32(ELF->header.e_flags);
-    fwrite(&temp32,4,1,fdest);
+    if (fwrite(&temp32,4,1,fdest) != 1) {exit(1);}
     
     //Size of headers
     temp16 = bswap_16(ELF->header.e_ehsize);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
     
     //Size of programm headers
     temp16 = bswap_16(ELF->header.e_phentsize);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
 
     //Number of programm headers
     temp16 = bswap_16(ELF->header.e_phnum);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
 
     //Size of section headers
     temp16 = bswap_16(ELF->header.e_shentsize);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
 
     //Number of section headers
     temp16 = bswap_16(ELF->header.e_shnum);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
 
     //Section header string table index
     temp16 = bswap_16(ELF->header.e_shstrndx);
-    fwrite(&temp16,2,1,fdest);
+    if (fwrite(&temp16,2,1,fdest) != 1) {exit(1);}
 
 }
 
@@ -129,22 +129,24 @@ void writeSectionContent(Elf32_Main * ELF, FILE * fdest){
         if(ELF->sectHeader[tab[i].indice].sh_type==SHT_SYMTAB){
             for (int j = 0; j < ELF->nb_symboles; j++) {
                 temp32 = bswap_32(ELF->symTable[j].st_name);
-                fwrite(&temp32, 4, 1, fdest);
+                if (fwrite(&temp32, 4, 1, fdest) != 1) {exit(1);}
 
                 temp32 = bswap_32(ELF->symTable[j].st_value);
-                fwrite(&temp32, 4, 1, fdest);
+                if (fwrite(&temp32, 4, 1, fdest) != 1) {exit(1);}
             
                 temp32 = bswap_32(ELF->symTable[j].st_size);
-                fwrite(&temp32, 4, 1, fdest);
+                if (fwrite(&temp32, 4, 1, fdest) != 1) {exit(1);}
 
-                fwrite(&ELF->symTable[j].st_info, 1, 1, fdest);
-                fwrite(&ELF->symTable[j].st_other, 1, 1, fdest);
+                if (fwrite(&ELF->symTable[j].st_info, 1, 1, fdest) != 1) {exit(1);}
+                if (fwrite(&ELF->symTable[j].st_other, 1, 1, fdest) != 1) {exit(1);}
 
                 temp16 = bswap_16(ELF->symTable[j].st_shndx);
-                fwrite(&temp16, 2, 1, fdest);
+                if (fwrite(&temp16, 2, 1, fdest) != 1) {exit(1);}
             }
-        }else{
-            fwrite(ELF->sectionContent[tab[i].indice].section,ELF->sectionContent[tab[i].indice].size,1,fdest);
+        } else{
+            if (ELF->sectionContent[tab[i].indice].size != 0) {
+                if (fwrite(ELF->sectionContent[tab[i].indice].section, ELF->sectionContent[tab[i].indice].size, 1, fdest) != 1) {exit(1);}
+            }
         }
     }
     free(tab);

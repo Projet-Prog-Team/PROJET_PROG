@@ -21,7 +21,7 @@ void usage(char *name) {
 		"Produce a display similar to arm-none-eabi-readelf and use same options\n"
 		"-w copy source file to dest file\n"
 		"-d copy source file to dest file with REL sections deleted\n"
-		"--text addr --data addr change symbol table to match new addresses\n\n"
+		"--text addr --data addr copy source file to dest file with symbol table updated\n\n"
 		, name);
 }
 
@@ -73,18 +73,8 @@ int main(int argc, char *argv[]) {
 	while ((opt = getopt_long(argc, argv, "hSsrx:awdj", longopts, NULL)) != -1) {
 		switch(opt) {
 			case 200:
-				// f_source = fopen(optarg, "rb");
-				// if (f_source == NULL) {
-				// 	printf("Impossible d'ouvrir le fichier source\n");
-				// 	exit(1);
-				// }
 				break;
 			case 201:
-				// f_dest = fopen(optarg, "w");
-				// if (f_dest == NULL) {
-				// 	printf("Impossible d'ouvrir le fichier destination\n");
-				// 	exit(1);
-				// }
 				break;
 			case 'h':
 				printHeader(&ELF);
