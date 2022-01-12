@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	ELF.relTable = loadRelocTable(f_source, &ELF);
 	ELF.sectionContent = loadSectionContent(f_source, &ELF);
 
-	while ((opt = getopt_long(argc, argv, "hSsrxawd", longopts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hSsrx:awdj", longopts, NULL)) != -1) {
 		switch(opt) {
 			case 200:
 				// f_source = fopen(optarg, "rb");
@@ -99,6 +99,9 @@ int main(int argc, char *argv[]) {
 				printRelocTable(f_source, &ELF);
 				break;
 			case 'x':
+				printSectionContentOne(&ELF,atoi(optarg));
+				break;
+			case 'j':
 				printSectionContent(&ELF);
 				break;
 			case 'a':
